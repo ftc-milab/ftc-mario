@@ -1,0 +1,6 @@
+yolov3.*
+__pycache*
+*.mp4
+data/*
+coco.names
+*.jpg
