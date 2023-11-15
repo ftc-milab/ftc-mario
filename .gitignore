@@ -6,3 +6,4 @@ coco.names
 *.jpg
 ultralytics_tutorials/*.pt
 *.pt
+runs*
