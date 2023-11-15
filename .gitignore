@@ -4,3 +4,5 @@ __pycache*
 data/*
 coco.names
 *.jpg
+ultralytics_tutorials/*.pt
+*.pt
