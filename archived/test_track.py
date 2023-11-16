@@ -23,7 +23,7 @@ while cap.isOpened():
     # cv2.waitKey(5000)
     
 
-    # Object detection using YOLO
+    # Object detection using YOLO    blob = cv2.dnn.blobFromImage(frame, 1/255.0, (416, 416), (0, 0, 0), True, crop=False)
     blob = cv2.dnn.blobFromImage(frame, 1/255.0, (416, 416), (0, 0, 0), True, crop=False)
     net.setInput(blob)
     outputs = net.forward(ln)

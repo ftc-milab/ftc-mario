@@ -1,5 +1,5 @@
 import cv2
-from sort import Sort
+from archived.sort import Sort
 
 tracker = Sort()
 
