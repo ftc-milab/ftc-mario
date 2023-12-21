@@ -1,0 +1,10 @@
+exp_id,max_frames,weights_fn,tracker_type,track_high_thresh,track_low_thresh,new_track_thresh,track_buffer,match_thresh,gmc_method,proximity_thresh,appearance_thresh,with_reid
+ow_dp,10000,best-organizers.pt,botsort,0.9,0.1,0.6,30,0.8,sparseOptFlow,0.5,0.25,False
+ow_pt04,10000,best-organizers.pt,botsort,0.9,0.1,0.6,30,0.8,sparseOptFlow,0.4,0.25,False
+ow_pt05,10000,best-organizers.pt,botsort,0.9,0.1,0.6,30,0.8,sparseOptFlow,0.5,0.25,False
+ow_pt06,10000,best-organizers.pt,botsort,0.9,0.1,0.6,30,0.8,sparseOptFlow,0.6,0.25,False
+ow_at020,10000,best-organizers.pt,botsort,0.9,0.1,0.6,30,0.8,sparseOptFlow,0.5,0.2,False
+ow_at025,10000,best-organizers.pt,botsort,0.9,0.1,0.6,30,0.8,sparseOptFlow,0.5,0.25,False
+ow_at030,10000,best-organizers.pt,botsort,0.9,0.1,0.6,30,0.8,sparseOptFlow,0.5,0.3,False
+ow_wrF,10000,best-organizers.pt,botsort,0.9,0.1,0.6,30,0.8,sparseOptFlow,0.5,0.25,False
+ow_wrT,10000,best-organizers.pt,botsort,0.9,0.1,0.6,30,0.8,sparseOptFlow,0.5,0.25,True

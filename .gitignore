@@ -4,6 +4,12 @@ __pycache*
 data/*
 coco.names
 *.jpg
+*.jpeg
 ultralytics_tutorials/*.pt
 *.pt
 runs*
+.ipynb_checkpoints/*
+TrackEval/*
+ftc-train/*
+ipynb-temp/*
+*.avi
