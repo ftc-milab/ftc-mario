@@ -1,0 +1,2 @@
+exp_id,max_frames,weights_fn,tracker_type,track_high_thresh,track_low_thresh,new_track_thresh,track_buffer,match_thresh
+yolo_ow10k,10000,best-tuned.pt,bytetrack,0.5,0.1,0.6,30,0.8

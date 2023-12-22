@@ -1,12 +1,20 @@
-# DO NOT USE; use ftc_video_yolo.py instead
+# Generate video with bbs from gt, tracker and yolo (without tracking)
+# Also shows:
+#     - frame number, 
+#     - tracker name, 
+#     - matchings 
+#     - messages of changes 
+# TODO: add kalman filter prediction boxs
 
+import numpy as np
 import cv2
 from math import floor
 import os
-import functools
+
 from tqdm import tqdm
 
-# exp_id="ow_dp"
+global_thickness=2
+
 exp_id="sortow10000"
 
 video = "/work/marioeduardo-a/ftc/FTC-2024-data/Train/train.mp4"
@@ -22,6 +30,14 @@ result_file = os.path.join(result_folder, f"FISH{exp_id}.txt")
 match_file = os.path.join(tracker_folder, f"FISH{exp_id}-pedestrian-bestmatch.txt")
 changes_file = os.path.join(tracker_folder, f"FISH{exp_id}-pedestrian-changes.txt")
 
+
+yolo_exp_id="yolo_ow10k"
+yolo_TrackerName= f"Train{yolo_exp_id}"
+yolo_trackers_folder = f"TrackEval/data/trackers/mot_challenge/FISH{yolo_exp_id}-train"
+yolo_tracker_folder = os.path.join(yolo_trackers_folder, yolo_TrackerName)
+yolo_result_folder = os.path.join(yolo_tracker_folder, "data")
+yolo_raw_result_file = os.path.join(yolo_result_folder, "raw.txt")
+
 cap = cv2.VideoCapture(video)
 
 if (cap.isOpened() == False):
@@ -30,16 +46,17 @@ if (cap.isOpened() == False):
 frame_width = int(cap.get(3))
 frame_height = int(cap.get(4))
 print(frame_width,frame_height)
-max_frames=100
+max_frames=10000
 
-out = cv2.VideoWriter(os.path.join(tracker_folder, f'outpy{max_frames}.avi'), cv2.VideoWriter_fourcc('M','J','P','G'), 10, (frame_width,frame_height))
-# out = cv2.VideoWriter(os.path.join(tracker_folder, f'outpy{max_frames}.mp4'), cv2.VideoWriter_fourcc(*'mp4v'), 10, (frame_width,frame_height))
+# out = cv2.VideoWriter(os.path.join(tracker_folder, f'outpy{max_frames}.avi'), cv2.VideoWriter_fourcc('M','J','P','G'), 10, (frame_width,frame_height))
+out = cv2.VideoWriter(os.path.join(tracker_folder, f'outpy_{exp_id}_{max_frames}_yolo.mp4'), cv2.VideoWriter_fourcc(*'mp4v'), 10, (frame_width,frame_height))
 
 colors = [(127, 0, 0), (0, 127, 0), (0, 0, 127), (127, 127, 0), (127, 0, 127), (0, 127, 127), (127, 63, 0), (63, 127, 0), (127, 0, 63), (63, 0, 127), (0, 127, 63), (0, 63, 127)]
-changes_num_print=5
+changes_num_print=20
 # y_pos=[600+i*50 for i in range(changes_num_print)]
-changes_pos=[600+i*50 for i in range(changes_num_print)]
+changes_pos=[650+i*50 for i in range(changes_num_print)]
 changes_text=["" for i in range(changes_num_print)]
+changes_color=[None for i in range(changes_num_print)]
 changes_curr=0
 changes_colors=[(127,0,0),(0,127,0),(0,0,127)]
 
@@ -49,7 +66,8 @@ changes=open(changes_file, 'r')
 
 with open(raw_result_file, 'r') as f, \
      open(label_file, 'r') as g, \
-     open(match_file, 'r') as m: 
+     open(match_file, 'r') as m, \
+     open(yolo_raw_result_file, 'r') as yolof: 
     frames = 1
     ret, img = cap.read()
     # while ret == True:
@@ -75,7 +93,7 @@ with open(raw_result_file, 'r') as f, \
             # text = "This is \n some text"
             matches=line.split(" ")[1:]
             match_arr=["" for i in range(11)]
-            match_arr[0]=f'{frame}'
+            match_arr[0]=f'{frame}  {exp_id}'
             for match in matches:
                 idx=int(match.split("-")[0])
                 match_arr[idx]=match
@@ -84,9 +102,9 @@ with open(raw_result_file, 'r') as f, \
             for ii in range(11):
                 y = y0 + ii*dy
                 if match_arr[ii]=="":
-                    cv2.putText(img, f"{ii}-None", (50, y ), cv2.FONT_HERSHEY_SIMPLEX, 1,(255,0,255), 1)    
+                    cv2.putText(img, f"{ii}-None", (50, y ), cv2.FONT_HERSHEY_SIMPLEX, 1,(255,0,255), global_thickness)    
                 else:
-                    cv2.putText(img, match_arr[ii], (50, y ), cv2.FONT_HERSHEY_SIMPLEX, 1, 1)    
+                    cv2.putText(img, match_arr[ii], (50, y ), cv2.FONT_HERSHEY_SIMPLEX, 1, global_thickness)    
                 
             
 
@@ -104,10 +122,11 @@ with open(raw_result_file, 'r') as f, \
             #     # 标注文本
                 font = cv2.FONT_HERSHEY_SIMPLEX
                 changes_text[changes_curr%changes_num_print]=str(frame)+" "+line2
+                changes_color[changes_curr%changes_num_print]=changes_colors[(changes_curr//changes_num_print)%len(changes_colors)]
                 changes_curr=changes_curr+1
-                changes_color_idx=changes_curr//changes_num_print
+                # changes_color_idx=changes_curr//changes_num_print
             for j in range(changes_num_print):
-                cv2.putText(img, changes_text[j], (50, changes_pos[j] ), font, 1, changes_colors[changes_color_idx%len(changes_colors)], 1)
+                cv2.putText(img, changes_text[j], (50, changes_pos[j] ), font, 1, changes_color[j], global_thickness)
         else:
             changes.seek(fine_num)
             
@@ -126,13 +145,34 @@ with open(raw_result_file, 'r') as f, \
                 break
                 #frames = frame
 
-            cv2.rectangle(img, (floor(left),floor(top)), (floor(left+width),floor(top+height)), colors[bid % len(colors)], 1)
+            cv2.rectangle(img, (floor(left),floor(top)), (floor(left+width),floor(top+height)), colors[bid % len(colors)], global_thickness)
+            
             # 标注文本
             font = cv2.FONT_HERSHEY_SIMPLEX
             text = str(bid)
             # cv2.putText(img, text, (floor(left + 20), floor(top + 20)), font, 1, colors[bid % len(colors)], 1)
-            cv2.putText(img, text, (floor(left), floor(top-5)), font, 1, colors[bid % len(colors)], 1)
+            cv2.putText(img, text, (floor(left), floor(top-5)), font, 1, colors[bid % len(colors)], global_thickness)
+        
+        while True:
+            fine_num = yolof.tell()
+            line = yolof.readline()
+            line = line.strip()
+            if len(line.split(" ")) == 1:
+                break
+            frame, bid, left, top, width, height, _, _, _, _ = line.split(" ")
+            frame, bid, left, top, width, height = int(frame), int(bid), float(left), float(top), float(width), float(height)
 
+            if frame > frames:
+                yolof.seek(fine_num)
+                break
+
+            pts = np.array([[floor(left),floor(top+height)],[floor(left+width/2),floor(top)],[floor(left+width),floor(top+height)]], np.int32)
+            pts = pts.reshape((-1,1,2))
+            cv2.polylines(img, [pts], True, (127,127,127), global_thickness)
+            # 标注文本
+            font = cv2.FONT_HERSHEY_SIMPLEX
+            text = str(bid)
+            
         while True:
             fine_num = g.tell()
             line = g.readline()
@@ -147,13 +187,13 @@ with open(raw_result_file, 'r') as f, \
                 frames = frame
                 break
 
-            cv2.circle(img, (floor(left+width/2),floor(top+height/2)), floor(width/2), colors[bid % len(colors)], 1)
+            cv2.circle(img, (floor(left+width/2),floor(top+height/2)), floor(width/2), colors[bid % len(colors)], global_thickness)
             # 标注文本
             font = cv2.FONT_HERSHEY_SIMPLEX
             text = str(bid)
             # cv2.putText(img, text, (floor(left+width/2),floor(top+height/2)), font, 1, colors[bid % len(colors)], 1)
             # cv2.putText(img, text,  (floor(left), floor(top+20)), font, 1, colors[bid % len(colors)], 1)
-            cv2.putText(img, text,  (floor(left), floor(top+25+25)), font, 1, colors[bid % len(colors)], 1)
+            cv2.putText(img, text,  (floor(left), floor(top+25+25)), font, 1, colors[bid % len(colors)], global_thickness)
         
         # font = cv2.FONT_HERSHEY_SIMPLEX
         # text=f'Frame: {i:5}'

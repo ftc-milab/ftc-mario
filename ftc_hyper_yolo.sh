@@ -6,4 +6,4 @@ conda activate ftc310
 echo $(which python)
 cd /work/marioeduardo-a/github/ftc-mario
 pwd
-python ftc_hyper_search.py
+python ftc_hyper_yolo.py
