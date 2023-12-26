@@ -5,6 +5,7 @@ from tqdm import tqdm
 import pandas as pd
 
 hyper_fn="param-results.csv"
+TRAIN=True
 
 def create_tracker_file(exp_id=None,\
                         max_frames=50, \
@@ -98,11 +99,11 @@ def create_folders(exp_id,max_frames):
         with open(fn,"w") as f:
             f.write("NAME\n")
             f.write(f"FISH{exp_id}")
-
-    if not os.path.exists(hyper_fn):
-        with open(hyper_fn,'w') as f:
-            f.write('exp_id,max_frames,weights_fn,tracker_type,track_high_thresh,track_low_thresh,new_track_thresh,track_buffer,match_thresh,')
-            f.write("HOTA,DetA,AssA,DetRe,DetPr,AssRe,AssPr,LocA,OWTA,HOTA(0),LocA(0),HOTALocA(0),Dets,GT_Dets,IDs,GT_IDs\n")
+    if TRAIN:
+        if not os.path.exists(hyper_fn):
+            with open(hyper_fn,'w') as f:
+                f.write('exp_id,max_frames,weights_fn,tracker_type,track_high_thresh,track_low_thresh,new_track_thresh,track_buffer,match_thresh,')
+                f.write("HOTA,DetA,AssA,DetRe,DetPr,AssRe,AssPr,LocA,OWTA,HOTA(0),LocA(0),HOTALocA(0),Dets,GT_Dets,IDs,GT_IDs\n")
 
 def track(weights_fn,max_frames):
     model=YOLO(weights_fn)
@@ -204,8 +205,9 @@ for index, row in df.iterrows():
     create_folders(row.exp_id,row.max_frames)
     track(row.weights_fn,row.max_frames)
     translate_results()
-    hota(row.exp_id,row.max_frames)
-    read_hota(exp_id=row.exp_id,\
+    if TRAIN:
+        hota(row.exp_id,row.max_frames)
+        read_hota(exp_id=row.exp_id,\
               max_frames=row.max_frames, \
               weights_fn=row.weights_fn,\
               tracker_type = row.tracker_type, \
