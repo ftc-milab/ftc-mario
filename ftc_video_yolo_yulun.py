@@ -187,7 +187,7 @@ with open(raw_result_file, 'r') as f, \
             text = str(bid)
             # cv2.putText(img, text, (floor(left+width/2),floor(top+height/2)), font, 1, colors[bid % len(colors)], 1)
             # cv2.putText(img, text,  (floor(left), floor(top+20)), font, 1, colors[bid % len(colors)], 1)
-            cv2.putText(img, text,  (floor(left), floor(top+25+25)), font, 1, colors[bid % len(colors)], global_thickness)
+            cv2.putText(img, text,  (floor(left+50), floor(top+50)), font, 1, colors[bid % len(colors)], global_thickness)
         
         # font = cv2.FONT_HERSHEY_SIMPLEX
         # text=f'Frame: {i:5}'
