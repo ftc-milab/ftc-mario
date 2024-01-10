@@ -1,3 +1,5 @@
 exp_id,max_frames,weights_fn,tracker_type,track_high_thresh,track_low_thresh,new_track_thresh,track_buffer,match_thresh,HOTA,DetA,AssA,DetRe,DetPr,AssRe,AssPr,LocA,OWTA,HOTA(0),LocA(0),HOTALocA(0),Dets,GT_Dets,IDs,GT_IDs
 yolo_ow,100,best-tuned.pt,bytetrack,0.5,0.1,0.6,30,0.8,57.093,92.175,35.368,95.079,95.174,48.008,48.062,94.147,57.976,61.29,92.935,56.96,999,1000,10,10
 yolo_ow10k,10000,best-tuned.pt,bytetrack,0.5,0.1,0.6,30,0.8,28.271,95.403,8.3836,96.759,96.974,15.041,15.07,95.038,28.481,29.416,94.732,27.867,99779,100000,11,10
+yolo_ow150,150,best-organizers.pt,yolo-only,0.5,0.1,0.6,30,0.8,26.777,99.118,7.2343,99.502,99.568,13.28,13.29,97.443,26.83,26.963,97.413,26.266,1499,1500,10,10
+yolo_ow10k,10000,best-organizers.pt,yolo-only,0.5,0.1,0.6,30,0.8,23.693,99.391,5.6479,99.582,99.798,10.645,10.671,97.911,23.716,23.759,97.898,23.26,99784,100000,11,10

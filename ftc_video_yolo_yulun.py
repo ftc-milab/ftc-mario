@@ -5,9 +5,9 @@ import os
 
 from tqdm import tqdm
 
-global_thickness=2
-
 exp_id=""
+max_frames=10000
+global_thickness=2
 
 video = "/work/marioeduardo-a/ftc/FTC-2024-data/Train/train.mp4"
 label_file = "/work/marioeduardo-a/ftc/FTC-2024-data/Train/train_gt_mot.txt"
@@ -40,12 +40,28 @@ if (cap.isOpened() == False):
 frame_width = int(cap.get(3))
 frame_height = int(cap.get(4))
 print(frame_width,frame_height)
-max_frames=10000
 
 # out = cv2.VideoWriter(os.path.join(tracker_folder, f'outpy{max_frames}.avi'), cv2.VideoWriter_fourcc('M','J','P','G'), 10, (frame_width,frame_height))
 out = cv2.VideoWriter(os.path.join(tracker_folder, f'outpy_{exp_id}_{max_frames}_yolo.mp4'), cv2.VideoWriter_fourcc(*'mp4v'), 10, (frame_width,frame_height))
 
-colors = [(127, 0, 0), (0, 127, 0), (0, 0, 127), (127, 127, 0), (127, 0, 127), (0, 127, 127), (127, 63, 0), (63, 127, 0), (127, 0, 63), (63, 0, 127), (0, 127, 63), (0, 63, 127)]
+# colors_gt = [(255, 255, 255), (0, 0, 0), (255, 0, 0), (0, 255, 0), (0, 0, 255), (255, 255, 0), (128, 0, 128), (0, 255, 255), (255, 165, 0), (255, 192, 203)]
+colors_gt = [(255, 255, 255),  (127,127,127), (0, 0, 0),#white,gray,black\
+             (255, 0, 0), (0, 255, 0), (0, 0, 255), #red,green,blue
+             (0, 255, 255), (255, 0, 255), (255, 255, 0), #cyan, magenta, yellow
+             (64, 64, 159), #brown
+             (255, 255, 255),  (127,127,127), (0, 0, 0),#white,gray,black\
+             (127, 0, 0), (0, 127, 0), (0, 0, 127), ##dark red,green,blue
+             (0, 127, 127), (127, 0, 127), (127, 127, 0), # dark cyan, magenta, yellow light
+             (64, 64  , 92), #dark brown
+             (255, 255, 255),  (127,127,127), (0, 0, 0),#white,gray,black\
+             (255, 127, 127), (127, 255, 127), (127, 127, 255), ##light red,green,blue
+             (127, 255, 255), (255, 127, 255), (255, 255, 127), # light cyan, magenta, yellow light
+             (92, 92  , 165), #dark brown
+             ] 
+colors_tr = [color for color in colors_gt]
+# print(len(colors_gt))
+# print(len(colors_tr))
+
 changes_num_print=20
 # y_pos=[600+i*50 for i in range(changes_num_print)]
 changes_pos=[650+i*50 for i in range(changes_num_print)]
@@ -68,6 +84,14 @@ with open(raw_result_file, 'r') as f, \
     for i in tqdm(range(max_frames)):
         # print('frame: ',i)
         
+        # put ids at the bottom
+                    
+        x0, dx = 1000, 50
+        y0, dy = 50, 50
+        for ii in range(len(colors_gt)):
+            x = x0 + ii%10*dx
+            y = y0 + (ii//10)*dy
+            cv2.putText(img, f"{(ii+1):2}", (x, y ), cv2.FONT_HERSHEY_SIMPLEX, 1,colors_gt[ii], global_thickness)    
         #best match
         fine_num = m.tell() #current file position
         line = m.readline() 
@@ -99,7 +123,15 @@ with open(raw_result_file, 'r') as f, \
                     cv2.putText(img, f"{ii}-None", (50, y ), cv2.FONT_HERSHEY_SIMPLEX, 1,(255,0,255), global_thickness)    
                 else:
                     cv2.putText(img, match_arr[ii], (50, y ), cv2.FONT_HERSHEY_SIMPLEX, 1, global_thickness)    
-                
+            
+            # define colors for tracker in the first frame to match
+            if i==0:
+                for match in matches:
+                    idx,idy=map(int,match.split("-"))
+                    colors_tr[idy-1% len(colors_tr)]=colors_gt[idx-1% len(colors_tr)]
+                # print(colors_gt)
+                # print(colors_tr)
+            
             
 
         # changes file
@@ -138,14 +170,22 @@ with open(raw_result_file, 'r') as f, \
                 f.seek(fine_num)
                 break
                 #frames = frame
-
-            cv2.rectangle(img, (floor(left),floor(top)), (floor(left+width),floor(top+height)), colors[bid % len(colors)], global_thickness)
+            if bid<=10:
+                cv2.rectangle(img, (floor(left),floor(top)), (floor(left+width),floor(top+height)), colors_tr[(bid-1) %  len(colors_tr)], 2)
+            elif bid<=20:
+                cv2.rectangle(img, (floor(left)-3,floor(top)-3), (floor(left+width)+3,floor(top+height)+3), colors_tr[(bid-1) % len(colors_tr)], 1)
+                cv2.rectangle(img, (floor(left)+3,floor(top)+3), (floor(left+width)-3,floor(top+height)-3), colors_tr[(bid-1) %  len(colors_tr)], 1)
+            else: 
+                cv2.rectangle(img, (floor(left)-5,floor(top)-5), (floor(left+width)+5,floor(top+height)+5), colors_tr[(bid-1) % len(colors_tr)], 1)
+                cv2.rectangle(img, (floor(left),floor(top)), (floor(left+width),floor(top+height)), colors_tr[(bid-1) %  len(colors_tr)], 1)
+                cv2.rectangle(img, (floor(left)+5,floor(top)+5), (floor(left+width)-5,floor(top+height)-5), colors_tr[(bid-1) %  len(colors_tr)], 1)
+                
             
             # 标注文本
             font = cv2.FONT_HERSHEY_SIMPLEX
             text = str(bid)
-            # cv2.putText(img, text, (floor(left + 20), floor(top + 20)), font, 1, colors[bid % len(colors)], 1)
-            cv2.putText(img, text, (floor(left), floor(top-5)), font, 1, colors[bid % len(colors)], global_thickness)
+            # cv2.putText(img, text, (floor(left + 20), floor(top + 20)), font, 1, colors[(bid-1) %  len(colors)], 1)
+            cv2.putText(img, text, (floor(left), floor(top-5)), font, 1, colors_tr[(bid-1) %  len(colors_tr)], global_thickness)
         
         while True:
             fine_num = yolof.tell()
@@ -181,13 +221,14 @@ with open(raw_result_file, 'r') as f, \
                 frames = frame
                 break
 
-            cv2.circle(img, (floor(left+width/2),floor(top+height/2)), floor(width/2), colors[bid % len(colors)], global_thickness)
+            cv2.circle(img, (floor(left+width/2),floor(top+height/2)), floor(width/2), colors_gt[(bid-1) %  len(colors_gt)], global_thickness)
             # 标注文本
             font = cv2.FONT_HERSHEY_SIMPLEX
             text = str(bid)
-            # cv2.putText(img, text, (floor(left+width/2),floor(top+height/2)), font, 1, colors[bid % len(colors)], 1)
-            # cv2.putText(img, text,  (floor(left), floor(top+20)), font, 1, colors[bid % len(colors)], 1)
-            cv2.putText(img, text,  (floor(left+50), floor(top+50)), font, 1, colors[bid % len(colors)], global_thickness)
+            # cv2.putText(img, text, (floor(left+width/2),floor(top+height/2)), font, 1, colors[(bid-1) %  len(colors)], 1)
+            # cv2.putText(img, text,  (floor(left), floor(top+20)), font, 1, colors[(bid-1) %  len(colors)], 1)
+            # cv2.putText(img, text,  (floor(left), floor(top+25+25)), font, 1, colors[(bid-1) %  len(colors)], global_thickness)
+            cv2.putText(img, text,  (floor(left+50), floor(top+50)), font, 1, colors_gt[(bid-1) %  len(colors_gt)], global_thickness)
         
         # font = cv2.FONT_HERSHEY_SIMPLEX
         # text=f'Frame: {i:5}'
