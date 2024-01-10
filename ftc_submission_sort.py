@@ -32,7 +32,7 @@ def create_tracker_file(exp_id=None,\
     global match_file
 
     TrackerName = f"Train{exp_id}"
-    trackers_folder = f"TrackEval/data/trackers/mot_challenge/FISH{exp_id}-train"
+    trackers_folder = f"TrackEvalYulun/data/trackers/mot_challenge/FISH{exp_id}-train"
     tracker_folder = os.path.join(trackers_folder, TrackerName)
     result_folder = os.path.join(tracker_folder, "data")
     tracker_config_file = os.path.join(tracker_folder, "custom-tracker.yaml")
@@ -53,7 +53,7 @@ def create_folders(exp_id=None,\
                         min_hits=3, \
                         iou_threshold=0.3):
     # FISH folder
-    FISH=f"TrackEval/data/gt/mot_challenge/FISH{exp_id}-train/FISH{exp_id}"
+    FISH=f"TrackEvalYulun/data/gt/mot_challenge/FISH{exp_id}-train/FISH{exp_id}"
 
     #gt folder
     fn=os.path.join(FISH,"gt")
@@ -61,14 +61,14 @@ def create_folders(exp_id=None,\
         os.makedirs(fn)
 
     #PerfectTracker folder
-    fn=f"TrackEval/data/trackers/mot_challenge/FISH{exp_id}-train/PerfectTracker/data"
+    fn=f"TrackEvalYulun/data/trackers/mot_challenge/FISH{exp_id}-train/PerfectTracker/data"
     if not os.path.exists(fn):
         os.makedirs(fn)
 
     # gt
-    # TrackEval/data/gt/mot_challenge/FISH-train/FISH/gt/gt.txt
+    # TrackEvalYulun/data/gt/mot_challenge/FISH-train/FISH/gt/gt.txt
     fn=os.path.join(FISH,"gt/gt.txt")
-    with open("TrackEval/data/gt/mot_challenge/FISH-train/FISH/gt/gt.txt","r") as f:
+    with open("TrackEvalYulun/data/gt/mot_challenge/FISH-train/FISH/gt/gt.txt","r") as f:
         with open(fn,"w") as g:
             frames=0
             for line in f:
@@ -78,11 +78,11 @@ def create_folders(exp_id=None,\
                     break
 
     # #Perfect tracker
-    cmd=f'cp {FISH}/gt/gt.txt "TrackEval/data/trackers/mot_challenge/FISH{exp_id}-train/PerfectTracker/data/FISH{exp_id}.txt"'
+    cmd=f'cp {FISH}/gt/gt.txt "TrackEvalYulun/data/trackers/mot_challenge/FISH{exp_id}-train/PerfectTracker/data/FISH{exp_id}.txt"'
     os.system(cmd)
     
 
-    #TrackEval/data/gt/mot_challenge/FISH-train/FISH/seqinfo.ini
+    #TrackEvalYulun/data/gt/mot_challenge/FISH-train/FISH/seqinfo.ini
     fn=os.path.join(FISH, "seqinfo.ini")
     with open(fn,"w") as f:
         f.write("[Sequence]\n")
@@ -90,7 +90,7 @@ def create_folders(exp_id=None,\
         f.write(f"seqLength={max_frames}")
 
     # seqmaps
-    seqmaps= "TrackEval/data/gt/mot_challenge/seqmaps"
+    seqmaps= "TrackEvalYulun/data/gt/mot_challenge/seqmaps"
     fns=[os.path.join(seqmaps, f'FISH{exp_id}-all.txt'),\
         os.path.join(seqmaps, f'FISH{exp_id}-test.txt'),\
         os.path.join(seqmaps, f'FISH{exp_id}-train.txt')]

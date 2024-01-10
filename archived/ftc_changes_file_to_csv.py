@@ -1,6 +1,6 @@
 
 
-fn='/work/marioeduardo-a/github/ftc-mario/TrackEval/data/trackers/mot_challenge/FISHow_dp-train/Trainow_dp/FISHow_dp-pedestrian-changes.txt'
+fn='/work/marioeduardo-a/github/ftc-mario/TrackEvalYulun/data/trackers/mot_challenge/FISHow_dp-train/Trainow_dp/FISHow_dp-pedestrian-changes.txt'
 gn='/work/marioeduardo-a/github/ftc-mario/changes.csv'
 with open(fn,'r') as f, \
         open(gn,'w') as g:

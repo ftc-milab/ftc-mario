@@ -13,7 +13,7 @@ video = "/work/marioeduardo-a/ftc/FTC-2024-data/Train/train.mp4"
 label_file = "/work/marioeduardo-a/ftc/FTC-2024-data/Train/train_gt_mot.txt"
 
 TrackerName = f"Train{exp_id}"
-trackers_folder = f"TrackEval/data/trackers/mot_challenge/FISH{exp_id}-train"
+trackers_folder = f"TrackEvalYulun/data/trackers/mot_challenge/FISH{exp_id}-train"
 tracker_folder = os.path.join(trackers_folder, TrackerName)
 result_folder = os.path.join(tracker_folder, "data")
 tracker_config_file = os.path.join(tracker_folder, "custom-tracker.yaml")

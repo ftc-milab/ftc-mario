@@ -11,15 +11,15 @@ exp_id=""
 frames_range=[-2,-1,0,1,2]
 
 
-# video = "TrackEval/data/trackers/mot_challenge/FISHow_dp-train/Trainow_dp/outpy10000.mp4"
-# video = "TrackEval/data/trackers/mot_challenge/FISHow_dp-train/Trainow_dp/outpy10000_yolo.mp4"
+# video = "TrackEvalYulun/data/trackers/mot_challenge/FISHow_dp-train/Trainow_dp/outpy10000.mp4"
+# video = "TrackEvalYulun/data/trackers/mot_challenge/FISHow_dp-train/Trainow_dp/outpy10000_yolo.mp4"
 video = "OfficalYolo_euclidean_rematch_match_thr_1/outpy__10000_yolo.mp4"
 
 # video = "/work/marioeduardo-a/ftc/FTC-2024-data/Train/train.mp4"
 # label_file = "/work/marioeduardo-a/ftc/FTC-2024-data/Train/train_gt_mot.txt"
 
 # TrackerName = f"Train{exp_id}"
-# trackers_folder = f"TrackEval/data/trackers/mot_challenge/FISH{exp_id}-train"
+# trackers_folder = f"TrackEvalYulun/data/trackers/mot_challenge/FISH{exp_id}-train"
 # tracker_folder = os.path.join(trackers_folder, TrackerName)
 tracker_folder = 'OfficalYolo_euclidean_rematch_match_thr_1'
 result_folder = os.path.join(tracker_folder, "data")
@@ -29,7 +29,7 @@ result_file = os.path.join(result_folder, f"FISH{exp_id}.txt")
 match_file = os.path.join(tracker_folder, f"FISH{exp_id}-pedestrian-bestmatch.txt")
 changes_file = os.path.join(tracker_folder, f"FISH{exp_id}-pedestrian-changes.txt")
 changes_folder = os.path.join(tracker_folder, f"changes{len(frames_range)}fr")
-# changes_folder= "TrackEval/data/trackers/mot_challenge/FISHow_dp-train/Trainow_dp/changes"
+# changes_folder= "TrackEvalYulun/data/trackers/mot_challenge/FISHow_dp-train/Trainow_dp/changes"
 
 
 # range_arr=[0 for i in range(frames_range)]

@@ -21,7 +21,7 @@ video = "/work/marioeduardo-a/ftc/FTC-2024-data/Train/train.mp4"
 label_file = "/work/marioeduardo-a/ftc/FTC-2024-data/Train/train_gt_mot.txt"
 
 TrackerName = f"Train{exp_id}"
-trackers_folder = f"TrackEval/data/trackers/mot_challenge/FISH{exp_id}-train"
+trackers_folder = f"TrackEvalYulun/data/trackers/mot_challenge/FISH{exp_id}-train"
 tracker_folder = os.path.join(trackers_folder, TrackerName)
 result_folder = os.path.join(tracker_folder, "data")
 tracker_config_file = os.path.join(tracker_folder, "custom-tracker.yaml")
@@ -33,7 +33,7 @@ changes_file = os.path.join(tracker_folder, f"FISH{exp_id}-pedestrian-changes.tx
 
 yolo_exp_id="yolo_ow10k"
 yolo_TrackerName= f"Train{yolo_exp_id}"
-yolo_trackers_folder = f"TrackEval/data/trackers/mot_challenge/FISH{yolo_exp_id}-train"
+yolo_trackers_folder = f"TrackEvalYulun/data/trackers/mot_challenge/FISH{yolo_exp_id}-train"
 yolo_tracker_folder = os.path.join(yolo_trackers_folder, yolo_TrackerName)
 yolo_result_folder = os.path.join(yolo_tracker_folder, "data")
 yolo_raw_result_file = os.path.join(yolo_result_folder, "raw.txt")
