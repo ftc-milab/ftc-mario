@@ -10,7 +10,7 @@ ultralytics_tutorials/*.pt
 runs*
 .ipynb_checkpoints/*
 TrackEval/*
-TrackEvalYulun/*
+TrackEvalYulun*
 ftc-train/*
 ipynb-temp/*
 *.avi
