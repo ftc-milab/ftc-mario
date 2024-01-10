@@ -1,10 +1,14 @@
+# Generate "tracking" results using Bytetrack tracker
+# Input: hyperparameters are read from a csv file
+# Output: BBs file; HOTA results; HOTA results summary in CSV file
+
 import os
 import cv2
 from ultralytics import YOLO
 from tqdm import tqdm
 import pandas as pd
 
-hyper_fn="param-results.csv"
+hyper_fn="param-bytetrack-results.csv"
 TRAIN=True
 
 def create_tracker_file(exp_id=None,\
@@ -188,7 +192,7 @@ def read_hota(exp_id=None,\
 
 
 
-df=pd.read_csv('param.csv')
+df=pd.read_csv('param-bytetrack.csv')
 
 for index, row in df.iterrows():
     print('(',index+1,'/',len(df),') rows')

@@ -1,3 +1,6 @@
+# Generate "tracking" results using SORT tracker
+# Input: hyperparameters are read from a csv file
+# Output: BBs file; HOTA results; HOTA results summary in CSV file
 
 from sort import Sort
 from ultralytics.engine.results import Boxes

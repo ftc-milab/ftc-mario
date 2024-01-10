@@ -1,3 +1,11 @@
+# Generate "tracking" results using BotSort tracker
+# Input: hyperparameters are read from a csv file
+# Output: BBs file; HOTA results; HOTA results summary in CSV file
+
+# IMPORTANT: After testing, it seems none of the hyperparameters specific to botsort 
+#            are implemented in ultralytics library.
+#            So basically this is just bytetrack.
+
 import os
 import cv2
 from ultralytics import YOLO

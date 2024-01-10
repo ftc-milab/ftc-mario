@@ -1,3 +1,7 @@
+# Code based on ftc_hyper_bytetrack but without HOTA evaluation
+# The main point is to generate the answer.txt file
+# TODO: remove unnecessary functions; or better, move "shared" functions in hyper and submission to single file
+
 import os
 import cv2
 from ultralytics import YOLO

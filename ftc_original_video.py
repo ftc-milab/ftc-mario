@@ -1,4 +1,4 @@
-#use the output txt to generate the video for training video
+# Generate video of training with frame number in the corner (nothing else)
 
 import cv2
 from math import floor

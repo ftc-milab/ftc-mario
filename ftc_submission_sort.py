@@ -1,3 +1,6 @@
+# Code based on ftc_hyper_sor but without HOTA evaluation
+# The main point is to generate the answer.txt file
+# TODO: remove unnecessary functions; or better, move "shared" functions in hyper and submission to single file
 
 from sort import Sort
 from ultralytics.engine.results import Boxes
