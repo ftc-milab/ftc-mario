@@ -124,10 +124,14 @@ def track(weights_fn,max_frames):
                 # Get the boxes and track IDs
                 boxes = results[0].boxes.xywh.cpu()
                 track_ids = results[0].boxes.id.int().cpu().tolist()
-
+                
+                
                 # Plot the tracks
                 for box, track_id in zip(boxes, track_ids):
                     x, y, w, h = box
+                    print(f"id:{track_id} x:{x:.4f} y:{y:.4f} w:{w:.4f} h:{h:.4f}")
+                    print()
+                    
                     x -= w/2
                     y -= h/2
                     r.write(f'{frames} {track_id} {x:.2f} {y:.2f} {w:.2f} {h:.2f} -1 -1 -1 -1\n')

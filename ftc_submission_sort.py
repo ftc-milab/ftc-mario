@@ -1,7 +1,7 @@
 
 from sort import Sort
 from ultralytics.engine.results import Boxes
-
+from math import floor
 import os
 import cv2
 from ultralytics import YOLO
@@ -24,6 +24,7 @@ def create_tracker_file(exp_id=None,\
     global result_folder
     global tracker_config_file
     global raw_result_file
+    global answer_file
     global result_file
     global match_file
 
@@ -33,6 +34,7 @@ def create_tracker_file(exp_id=None,\
     result_folder = os.path.join(tracker_folder, "data")
     tracker_config_file = os.path.join(tracker_folder, "custom-tracker.yaml")
     raw_result_file = os.path.join(result_folder, "raw.txt")
+    answer_file=os.path.join(result_folder, "answer.txt")
     result_file = os.path.join(result_folder, f"FISH{exp_id}.txt")
     match_file = os.path.join(tracker_folder, f"FISH{exp_id}-pedestrian-bestmatch.txt")
 
@@ -138,13 +140,22 @@ def track(exp_id=None,\
                 # for box, track_id in zip(boxes, track_ids):
                 for track_bb_id in track_bbs_ids:
                     box=track_bb_id[:4]
-
+                    
                     track_id=int(track_bb_id[4])
                     x1,y1,x2,y2=box
                     x, y, w, h = x1,y1,x2-x1,y2-y1
-                    # x -= w/2
-                    # y -= h/2
-                    r.write(f'{frames} {track_id} {x:.2f} {y:.2f} {w:.2f} {h:.2f} -1 -1 -1 -1\n')
+                    
+                    # cv2.rectangle(frame, (floor(x),floor(y)), (floor(x+w),floor(y+h)),1,1)
+                    
+                    # print(f"id:{track_id} x1:{x1:.4f} y1:{y1:.4f} x2:{x2:.4f} y2:{y2:.4f}",end="")
+                    # print(f"x:{x:.4f} y:{y1:.4f} w:{w:.4f} h:{h:.4f}")
+                    # print()
+                    # x += w/2
+                    # y += h/2
+                    r.write(f'{frames} {track_id} {x} {y} {w} {h} -1 -1 -1 -1\n')
+                
+                # cv2.imwrite("debug_sub.jpeg", frame)
+                # exit()
             else:
                 # Break the loop if the end of the video is reached
                 break
@@ -155,17 +166,19 @@ def track(exp_id=None,\
     cv2.destroyAllWindows()
 
 def translate_results():
-    with open(raw_result_file, 'r') as f:
-        with open(result_file, 'w') as g:
-            for line in f:
-                # print(line)
-                line = line.strip()
-                # print(line)
-                # print(line.split(" "))
-                frame, bid, left, top, width, height, _, _, _, _ = line.split(" ")
-                g.write(f'{frame}, {bid}, {left}, {top}, {width}, {height}, -1, -1, -1, -1\n')
-import subprocess
+    with open(raw_result_file, 'r') as f,\
+            open(result_file, 'w') as g,\
+            open(answer_file, 'w') as answer:
+        for line in f:
+            # print(line)
+            line = line.strip()
+            # print(line)
+            # print(line.split(" "))
+            frame, bid, left, top, width, height, _, _, _, _ = line.split(" ")
+            g.write(f'{frame}, {bid}, {left}, {top}, {width}, {height}, -1, -1, -1, -1\n')
+            answer.write(f'{frame} {bid} {top} {left} {width} {height} -1 -1 -1 -1\n')
 
+    
 
 def hota(exp_id=None,\
                         max_frames=50, \

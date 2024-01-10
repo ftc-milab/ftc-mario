@@ -1,2 +1,2 @@
 exp_id,max_frames,weights_fn,tracker_type,max_age,min_hits,iou_threshold
-sub-sortma2mh0it007,10400,best-organizers.pt,sort,2,0,0.07
+sub-sortma2mh0it007mf10400,10400,best-organizers.pt,sort,2,0,0.07
