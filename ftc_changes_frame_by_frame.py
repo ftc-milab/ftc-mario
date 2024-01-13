@@ -6,14 +6,23 @@ from tqdm import tqdm
 import os
 
 exp_id=""
-# frames_range=[0]
-# frames_range=[-1,0,1]
-frames_range=[-2,-1,0,1,2]
+num_frames=3 
+
+if num_frames%2==1:
+    print("num_frames should be an odd number")
+    exit()
+
+frames_range=[i-num_frames//2 for i in range(num_frames)]
+# num_frames: 3 => [-1,0,1]
+# num_frames: 5 => [-2,-1,0,1,2]
+# and so on
+
+
 
 
 # video = "TrackEvalYulun/data/trackers/mot_challenge/FISHow_dp-train/Trainow_dp/outpy10000.mp4"
 # video = "TrackEvalYulun/data/trackers/mot_challenge/FISHow_dp-train/Trainow_dp/outpy10000_yolo.mp4"
-video = "OfficalYolo_euclidean_rematch_match_thr_1/outpy__10000_yolo.mp4"
+video = "OfficalYolo_euclidean_rematch_match_thr_1/outpy_OfficalYolo_euclidean_rematch_match_thr_1_10000_yolo.mp4"
 
 # video = "/work/marioeduardo-a/ftc/FTC-2024-data/Train/train.mp4"
 # label_file = "/work/marioeduardo-a/ftc/FTC-2024-data/Train/train_gt_mot.txt"
@@ -55,7 +64,8 @@ with open(changes_file, 'r') as changes:
                 # print(frame)
                 cap.set(cv2.CAP_PROP_POS_FRAMES, max(0,frame+j-1))
                 ret, img = cap.read()
-                cv2.imwrite(os.path.join(changes_folder,f"{frame+j:05d}.jpeg"), img)
+                tag="c" if j==0 else ""
+                cv2.imwrite(os.path.join(changes_folder,f"{frame+j:05d}{tag}.jpeg"), img)
         # print('i',i)
      
 

@@ -4,7 +4,7 @@ import os
 # Load a model
 
 
-df=pd.read_csv('param-train.csv')
+df=pd.read_csv('param-train-4.csv')
 
 for index, row in df.iterrows():
     print('(',index+1,'/',len(df),') rows')
@@ -20,7 +20,7 @@ for index, row in df.iterrows():
                             save=row.save,\
                             save_period=row.save_period,\
                             cache=row.cache,\
-                            device=[0,1],\
+                            device=0,\
                             workers=row.workers,\
                             project="weights",\
                             name=row.exp_id,\

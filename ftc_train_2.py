@@ -4,7 +4,7 @@ import os
 # Load a model
 
 
-df=pd.read_csv('param-train.csv')
+df=pd.read_csv('param-train-2.csv')
 
 for index, row in df.iterrows():
     print('(',index+1,'/',len(df),') rows')

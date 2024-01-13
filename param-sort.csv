@@ -1,3 +1,2 @@
 exp_id,max_frames,weights_fn,tracker_type,max_age,min_hits,iou_threshold
-sortma2mh0it007,10000,best-organizers.pt,sort,2,0,0.07
-
+yolov8le200b64,10000,yolov8le200b64.pt,sort,2,0,0.07
