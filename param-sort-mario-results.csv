@@ -1,0 +1,2 @@
+exp_id,max_frames,weights_fn,tracker_type,max_age,min_hits,iou_threshold,HOTA,DetA,AssA,DetRe,DetPr,AssRe,AssPr,LocA,OWTA,HOTA(0),LocA(0),HOTALocA(0),Dets,GT_Dets,IDs,GT_IDs
+sort-mario-ma2mh0it007,10000,best-organizers.pt,sort-mario,2,0,0.07,42.067,92.569,19.134,94.823,95.029,22.174,62.513,93.323,42.595,44.825,92.785,41.591,99784,100000,61,10

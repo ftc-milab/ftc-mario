@@ -43,6 +43,25 @@ def linear_assignment(cost_matrix):
     x, y = linear_sum_assignment(cost_matrix)
     return np.array(list(zip(x, y)))
 
+def euclidean_distance_batch(bb_test, bb_gt):
+  """
+  From SORT: Computes euclidean_distance between two bboxes in the form [x1,y1,x2,y2]
+  """
+  bb_gt = np.expand_dims(bb_gt, 0)
+  bb_test = np.expand_dims(bb_test, 1)
+  
+
+  x_gt=bb_gt[...,0]
+  y_gt=bb_gt[...,1]
+  x_tr=bb_test[...,0]
+  y_tr=bb_test[...,1]
+  d= np.sqrt(
+          (x_gt-x_tr).dot(x_gt-x_tr)+\
+          (y_gt-y_tr).dot(y_gt-y_tr))
+  print('d')
+  print(d)
+  exit()
+  return(d)  
 
 def iou_batch(bb_test, bb_gt):
   """
@@ -102,8 +121,17 @@ class KalmanBoxTracker(object):
     """
     #define constant velocity model
     self.kf = KalmanFilter(dim_x=7, dim_z=4) 
-    self.kf.F = np.array([[1,0,0,0,1,0,0],[0,1,0,0,0,1,0],[0,0,1,0,0,0,1],[0,0,0,1,0,0,0],  [0,0,0,0,1,0,0],[0,0,0,0,0,1,0],[0,0,0,0,0,0,1]])
-    self.kf.H = np.array([[1,0,0,0,0,0,0],[0,1,0,0,0,0,0],[0,0,1,0,0,0,0],[0,0,0,1,0,0,0]])
+    self.kf.F = np.array([[1,0,0,0,1,0,0],\
+                          [0,1,0,0,0,1,0],\
+                          [0,0,1,0,0,0,1],\
+                          [0,0,0,1,0,0,0],\
+                          [0,0,0,0,1,0,0],\
+                          [0,0,0,0,0,1,0],\
+                          [0,0,0,0,0,0,1]])
+    self.kf.H = np.array([[1,0,0,0,0,0,0],\
+                          [0,1,0,0,0,0,0],\
+                          [0,0,1,0,0,0,0],\
+                          [0,0,0,1,0,0,0]])
 
     self.kf.R[2:,2:] *= 10.
     self.kf.P[4:,4:] *= 1000. #give high uncertainty to the unobservable initial velocities
@@ -157,15 +185,44 @@ def associate_detections_to_trackers(detections,trackers,iou_threshold = 0.3):
 
   Returns 3 lists of matches, unmatched_detections and unmatched_trackers
   """
+  with open('sort_mario_tr_det.txt','a') as f:
+    f.write(f'dt: {len(detections)} tr:{len(trackers)}\n')
+  
+  # print('trackers')
+  # print(trackers)
+  # print('detections')
+  # print(detections)
+  # print('np.empty((0,2),dtype=int)')
+  # print(np.empty((0,2),dtype=int).shape)
+  # print('np.arange(len(detections))')
+  # print(np.arange(len(detections)))
+  # print('np.empty((0,5),dtype=int)')
+  # print(np.empty((0,5),dtype=int).shape)
   if(len(trackers)==0):
+    # matches=empty  udet=[0,]
     return np.empty((0,2),dtype=int), np.arange(len(detections)), np.empty((0,5),dtype=int)
-
+  
   iou_matrix = iou_batch(detections, trackers)
-
+  
+  # print("iou_matrix")
+  # print(iou_matrix)
+  
   if min(iou_matrix.shape) > 0:
     a = (iou_matrix > iou_threshold).astype(np.int32)
+    # print('a')
+    # print(a)
+    # print('a.sum(1).max()')
+    # print(a.sum(1).max())
+    # print('a.sum(0).max()')
+    # print(a.sum(0).max())
     if a.sum(1).max() == 1 and a.sum(0).max() == 1:
+        # print(f'perfect match frame')
+        # print('np.where(a)')
+        # print(np.where(a))
         matched_indices = np.stack(np.where(a), axis=1)
+        # print('matched_indices')
+        # print(matched_indices)
+        # print(np.where(a))
     else:
       matched_indices = linear_assignment(-iou_matrix)
   else:
@@ -180,10 +237,13 @@ def associate_detections_to_trackers(detections,trackers,iou_threshold = 0.3):
     if(t not in matched_indices[:,1]):
       unmatched_trackers.append(t)
 
+
+  ### THIS WILL NEVER ENTER iou_threshold is 0
   #filter out matched with low IOU
   matches = []
   for m in matched_indices:
     if(iou_matrix[m[0], m[1]]<iou_threshold):
+      print("this should never enter")
       unmatched_detections.append(m[0])
       unmatched_trackers.append(m[1])
     else:
@@ -191,7 +251,12 @@ def associate_detections_to_trackers(detections,trackers,iou_threshold = 0.3):
   if(len(matches)==0):
     matches = np.empty((0,2),dtype=int)
   else:
+    # print("matches before")
+    # print(matches)
     matches = np.concatenate(matches,axis=0)
+    # print("matches after")
+    # print(matches)
+  ### THIS WILL NEVER ENTER iou_threshold is 0
 
   return matches, np.array(unmatched_detections), np.array(unmatched_trackers)
 
@@ -219,12 +284,23 @@ class Sort(object):
 
     NOTE: The number of objects returned may differ from the number of detections provided.
     """
+    # print(f'self.frame_count:{self.frame_count}')
+
     self.frame_count += 1
     # get predicted locations from existing trackers.
     trks = np.zeros((len(self.trackers), 5))
+    # print(trks)
     to_del = []
     ret = []
+    
+    print(f'f:{self.frame_count}')
     for t, trk in enumerate(trks):
+      print('  x',self.trackers[t].kf.x.reshape((1,7)))
+    for t, trk in enumerate(trks):
+      print('  z',self.trackers[t].kf.z.reshape((1,4)))
+    # Kalman filter predictions 
+    for t, trk in enumerate(trks):
+      # advance the state and predict
       pos = self.trackers[t].predict()[0]
       trk[:] = [pos[0], pos[1], pos[2], pos[3], 0]
       if np.any(np.isnan(pos)):
@@ -232,6 +308,8 @@ class Sort(object):
     trks = np.ma.compress_rows(np.ma.masked_invalid(trks))
     for t in reversed(to_del):
       self.trackers.pop(t)
+
+
     matched, unmatched_dets, unmatched_trks = associate_detections_to_trackers(dets,trks, self.iou_threshold)
 
     # update matched trackers with assigned detections

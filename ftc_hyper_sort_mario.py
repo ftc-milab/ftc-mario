@@ -1,18 +1,18 @@
-# Code based on ftc_hyper_sor but without HOTA evaluation
-# The main point is to generate the answer.txt file
-# TODO: remove unnecessary functions; or better, move "shared" functions in hyper and submission to single file
+# Generate "tracking" results using SORT tracker
+# Input: hyperparameters are read from a csv file
+# Output: BBs file; HOTA results; HOTA results summary in CSV file
 
-from sort import Sort
-from ultralytics.engine.results import Boxes
-from math import floor
+from sort_mario import Sort
+
 import os
 import cv2
 from ultralytics import YOLO
 from tqdm import tqdm
 import pandas as pd
 
-    
-def create_folders(exp_id=None,\
+hyper_fn="param-sort-mario-results.csv"
+
+def create_tracker_file(exp_id=None,\
                         max_frames=50, \
                         weights_fn='best-organizers.pt',\
                         tracker_type = 'sort', \
@@ -25,23 +25,28 @@ def create_folders(exp_id=None,\
     global tracker_folder
     global result_folder
     global raw_result_file
-    global answer_file
     global result_file
-    
+    global match_file
 
-    # paths
     TrackerName = f"Train{exp_id}"
     trackers_folder = f"TrackEvalYulun/data/trackers/mot_challenge/FISH{exp_id}-train"
     tracker_folder = os.path.join(trackers_folder, TrackerName)
     result_folder = os.path.join(tracker_folder, "data")
     raw_result_file = os.path.join(result_folder, "raw.txt")
-    answer_file=os.path.join(result_folder, "answer.txt")
     result_file = os.path.join(result_folder, f"FISH{exp_id}.txt")
-    
+    match_file = os.path.join(tracker_folder, f"FISH{exp_id}-pedestrian-bestmatch.txt")
 
     if not os.path.exists(result_folder):
         os.makedirs(result_folder)
 
+    
+def create_folders(exp_id=None,\
+                        max_frames=50, \
+                        weights_fn='best-organizers.pt',\
+                        tracker_type = 'sort', \
+                        max_age=1, \
+                        min_hits=3, \
+                        iou_threshold=0.3):
     # FISH folder
     FISH=f"TrackEvalYulun/data/gt/mot_challenge/FISH{exp_id}-train/FISH{exp_id}"
 
@@ -55,7 +60,8 @@ def create_folders(exp_id=None,\
     if not os.path.exists(fn):
         os.makedirs(fn)
 
-    # gt data
+    # gt
+    # TrackEvalYulun/data/gt/mot_challenge/FISH-train/FISH/gt/gt.txt
     fn=os.path.join(FISH,"gt/gt.txt")
     with open("TrackEvalYulun/data/gt/mot_challenge/FISH-train/FISH/gt/gt.txt","r") as f:
         with open(fn,"w") as g:
@@ -66,12 +72,12 @@ def create_folders(exp_id=None,\
                 if frames> max_frames*10-1:
                     break
 
-    # Perfect tracker data
+    # #Perfect tracker
     cmd=f'cp {FISH}/gt/gt.txt "TrackEvalYulun/data/trackers/mot_challenge/FISH{exp_id}-train/PerfectTracker/data/FISH{exp_id}.txt"'
     os.system(cmd)
     
 
-    # seqinfo
+    #TrackEvalYulun/data/gt/mot_challenge/FISH-train/FISH/seqinfo.ini
     fn=os.path.join(FISH, "seqinfo.ini")
     with open(fn,"w") as f:
         f.write("[Sequence]\n")
@@ -88,6 +94,10 @@ def create_folders(exp_id=None,\
             f.write("NAME\n")
             f.write(f"FISH{exp_id}")
 
+    if not os.path.exists(hyper_fn):
+        with open(hyper_fn,'w') as f:
+            f.write('exp_id,max_frames,weights_fn,tracker_type,max_age,min_hits,iou_threshold,')
+            f.write("HOTA,DetA,AssA,DetRe,DetPr,AssRe,AssPr,LocA,OWTA,HOTA(0),LocA(0),HOTALocA(0),Dets,GT_Dets,IDs,GT_IDs\n")
 
 def track(exp_id=None,\
                         max_frames=50, \
@@ -97,23 +107,13 @@ def track(exp_id=None,\
                         min_hits=3, \
                         iou_threshold=0.3):
     model=YOLO(weights_fn)
-    
-    
-    # if 'mot_tracker' in locals():
-    #     # delete in case it was defined before; this will prevent IDs starting from the
-    #     # previous last ID in the previous row
-    #     Sort.KalmanBoxTracker.count=0
-    #     del mot_tracker
+
     #create instance of SORT
-    
     mot_tracker = Sort(max_age=max_age,min_hits=min_hits,iou_threshold=iou_threshold) 
-    mot_tracker.reset_count()
     #tracking the model and write the result to txt
     # video = "/content/drive/MyDrive/FTC-2024-data/Train/train.mp4"
-    video = "/work/marioeduardo-a/ftc/FTC-2024-data/Test/test.mp4"
+    video = "/work/marioeduardo-a/ftc/FTC-2024-data/Train/train.mp4"
     cap = cv2.VideoCapture(video)
-    
-    print('frames:',int(cap.get(cv2.CAP_PROP_FRAME_COUNT)))
     with open(raw_result_file, 'w') as r:
         # frames = 1
         # while cap.isOpened() and frames<=max_frames:
@@ -121,7 +121,10 @@ def track(exp_id=None,\
             success, frame = cap.read()
 
             if success:
+                # print(frames)
                 results = model.predict(frame, verbose=False)
+                # Get the boxes and track IDs
+                # boxes = results[0].boxes.xywh.cpu()
                 boxes = results[0].boxes.xyxy.cpu()
                 track_bbs_ids = mot_tracker.update(boxes)
                 # print(track_bbs_ids)
@@ -133,18 +136,13 @@ def track(exp_id=None,\
                 # for box, track_id in zip(boxes, track_ids):
                 for track_bb_id in track_bbs_ids:
                     box=track_bb_id[:4]
-                    
+
                     track_id=int(track_bb_id[4])
                     x1,y1,x2,y2=box
                     x, y, w, h = x1,y1,x2-x1,y2-y1
-                    
-                    # print(f"id:{track_id} x1:{x1:.4f} y1:{y1:.4f} x2:{x2:.4f} y2:{y2:.4f}",end="")
-                    # print(f"x:{x:.4f} y:{y1:.4f} w:{w:.4f} h:{h:.4f}")
-                    # print()
-                    r.write(f'{frames} {track_id} {x} {y} {w} {h} -1 -1 -1 -1\n')
-                
-                # cv2.imwrite("debug_sub.jpeg", frame)
-                # exit()
+                    # x -= w/2
+                    # y -= h/2
+                    r.write(f'{frames} {track_id} {x:.2f} {y:.2f} {w:.2f} {h:.2f} -1 -1 -1 -1\n')
             else:
                 # Break the loop if the end of the video is reached
                 break
@@ -155,21 +153,68 @@ def track(exp_id=None,\
     cv2.destroyAllWindows()
 
 def translate_results():
-    with open(raw_result_file, 'r') as f,\
-            open(result_file, 'w') as g,\
-            open(answer_file, 'w') as answer:
-        for line in f:
-            line = line.strip()
-            frame, bid, left, top, width, height, _, _, _, _ = line.split(" ")
-            g.write(f'{frame}, {bid}, {left}, {top}, {width}, {height}, -1, -1, -1, -1\n')
-            answer.write(f'{frame} {bid} {top} {left} {width} {height} -1 -1 -1 -1\n')
-    
+    with open(raw_result_file, 'r') as f:
+        with open(result_file, 'w') as g:
+            for line in f:
+                # print(line)
+                line = line.strip()
+                # print(line)
+                # print(line.split(" "))
+                frame, bid, left, top, width, height, _, _, _, _ = line.split(" ")
+                g.write(f'{frame}, {bid}, {left}, {top}, {width}, {height}, -1, -1, -1, -1\n')
+import subprocess
 
-df=pd.read_csv('param-sort-submission.csv')
+
+def hota(exp_id=None,\
+                        max_frames=50, \
+                        weights_fn='best-organizers.pt',\
+                        tracker_type = 'sort', \
+                        max_age=1, \
+                        min_hits=3, \
+                        iou_threshold=0.3):
+    cmd=f"cd TrackEvalYulun && python scripts/run_mot_challenge.py --BENCHMARK FISH{exp_id} \
+        --SPLIT_TO_EVAL train --TRACKERS_TO_EVAL {TrackerName} --METRICS HOTA --USE_PARALLEL False \
+        --NUM_PARALLEL_CORES 1 --DO_PREPROC False 1>/dev/null"
+    print(cmd)
+    os.system(cmd)
+
+
+def read_hota(exp_id=None,\
+                        max_frames=50, \
+                        weights_fn='best-organizers.pt',\
+                        tracker_type = 'sort', \
+                        max_age=1, \
+                        min_hits=3, \
+                        iou_threshold=0.3):
+    fn=os.path.join(tracker_folder,"pedestrian_summary.txt")
+    with open(fn) as f:
+
+        line1=f.readline()
+        # f.readline
+        # print('line1:',line1)
+        line2=f.readline()
+        # print('line2:',line2)
+        line= ','.join(line2.split())
+
+        with open(hyper_fn,'a') as g:
+            g.write(f"{exp_id},{max_frames},{weights_fn},{tracker_type},{max_age},{min_hits},{iou_threshold},")
+            g.write(line)
+            g.write('\n')
+
+
+
+df=pd.read_csv('param-sort-mario.csv')
 
 for index, row in df.iterrows():
     print('(',index+1,'/',len(df),') rows')
                         
+    create_tracker_file(exp_id=row.exp_id,\
+                        max_frames=row.max_frames, \
+                        weights_fn=row.weights_fn,\
+                        tracker_type = row.tracker_type, \
+                        max_age = row.max_age, \
+                        min_hits = row.min_hits, \
+                        iou_threshold = row.iou_threshold)
     create_folders(exp_id=row.exp_id,\
                         max_frames=row.max_frames, \
                         weights_fn=row.weights_fn,\
@@ -185,3 +230,18 @@ for index, row in df.iterrows():
                         min_hits = row.min_hits, \
                         iou_threshold = row.iou_threshold)
     translate_results()
+    hota(exp_id=row.exp_id,\
+                        max_frames=row.max_frames, \
+                        weights_fn=row.weights_fn,\
+                        tracker_type = row.tracker_type, \
+                        max_age = row.max_age, \
+                        min_hits = row.min_hits, \
+                        iou_threshold = row.iou_threshold)
+    read_hota(exp_id=row.exp_id,\
+                        max_frames=row.max_frames, \
+                        weights_fn=row.weights_fn,\
+                        tracker_type = row.tracker_type, \
+                        max_age = row.max_age, \
+                        min_hits = row.min_hits, \
+                        iou_threshold = row.iou_threshold)
+

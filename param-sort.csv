@@ -1,2 +1,4 @@
 exp_id,max_frames,weights_fn,tracker_type,max_age,min_hits,iou_threshold
-yolov8le200b64,10000,yolov8le200b64.pt,sort,2,0,0.07
+yolov8me200b32,10000,yolov8me200b32.pt,sort,2,0,0.07
+yolov8me200b64,10000,yolov8me200b64.pt,sort,2,0,0.07
+yolov8me200b128,10000,yolov8me200b128.pt,sort,2,0,0.07
