@@ -5,7 +5,7 @@ import os
 
 from tqdm import tqdm
 
-exp_id="sub-sortma2mh0it007mf10400"
+exp_id="sub-8lb144e900-ma25mh0it0"
 max_frames=10400
 
 global_thickness=2

@@ -13,7 +13,7 @@ import os
 
 from tqdm import tqdm
 
-exp_id="sortma2mh0it007"
+exp_id="sub-8lb144e900-ma25mh0it0"
 # exp_id="sortma2mh0it007yolo8l200e_dp"
 # exp_id="yolo_ow10k"
 max_frames=10000

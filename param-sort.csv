@@ -1,4 +1,10 @@
 exp_id,max_frames,weights_fn,tracker_type,max_age,min_hits,iou_threshold
-yolov8me200b32,10000,yolov8me200b32.pt,sort,2,0,0.07
-yolov8me200b64,10000,yolov8me200b64.pt,sort,2,0,0.07
-yolov8me200b128,10000,yolov8me200b128.pt,sort,2,0,0.07
+t80v20t0-8lb144e200-ma11mh1it0,10000,t80v20t0-yolov8le200b144gpu1.pt,sort,11,1,0
+t80v20t0-8lb144e200-ma17mh1it0,10000,t80v20t0-yolov8le200b144gpu1.pt,sort,17,1,0
+t80v20t0-8lb144e200-ma25mh1it0,10000,t80v20t0-yolov8le200b144gpu1.pt,sort,25,1,0
+8mb16e1000best-ma11mh1it0,10000,yolov8m_e1000s100_dp.pt,sort,11,1,0
+8mb16e1000best-ma17mh1it0,10000,yolov8m_e1000s100_dp.pt,sort,17,1,0
+8mb16e1000best-ma25mh1it0,10000,yolov8m_e1000s100_dp.pt,sort,25,1,0
+8lb144e900-ma11mh1it0,10400,yolov8le1000b144gpu1_epoch900.pt,sort,11,1,0
+8lb144e900-ma17mh1it0,10400,yolov8le1000b144gpu1_epoch900.pt,sort,17,1,0
+8lb144e900-ma25mh1it0,10400,yolov8le1000b144gpu1_epoch900.pt,sort,25,1,0

@@ -11,18 +11,13 @@ foi_range=10
 
 # max_frames=foi[-1]
 max_frames=10400
-# weights_fn='best-organizers.pt'
-weights_fn='8lb144e900-ma25mh0it0.pt'
+weights_fn='best-organizers.pt'
 # weights_fn='yolov8le1000b144gpu1_epoch900.pt'
-
-
-# # Delete contents of sort_mario_tr_det.txt
-# with open('sort_mario_tr_det.txt','w') as f:
-#     f.write("")    
+# weights_fn='yolov8le1000b144gpu1_epoch900.pt'
 
 model=YOLO(weights_fn)
 
-ma,mh,it=2,0,0
+ma,mh,it=2,1,0
 print(f's{foi[0]}f{max_frames}_ma{ma} mi{mh} it{it}')
 
 mot_tracker = Sort(max_age=ma,min_hits=mh,iou_threshold=it) 
