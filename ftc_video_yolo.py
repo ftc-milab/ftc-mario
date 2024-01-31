@@ -102,6 +102,7 @@ with open(raw_result_file, 'r') as f, \
             x = x0 + ii%10*dx
             y = y0 + (ii//10)*dy
             cv2.putText(img, f"{(ii+1):2}", (x, y ), cv2.FONT_HERSHEY_SIMPLEX, 1,colors_gt[ii], global_thickness)    
+        
         #best match
         fine_num = m.tell() #current file position
         line = m.readline() 

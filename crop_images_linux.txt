@@ -1,0 +1,10 @@
+e
+if [ -z "$1" -o -z "$2" -o -z "$3" ]; then
+    echo "Error. You did not provide x, y, w"
+	exit
+fi
+
+#!/bin/bash
+for filename in 0*.jpeg; do
+    convert $filename -crop ${3}x${3}+$1+$2 "crop_$(basename "$filename" .jpeg).jpeg"
+done

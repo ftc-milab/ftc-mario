@@ -4,16 +4,31 @@ from math import floor
 import os
 
 from tqdm import tqdm
+import sys
 
-# exp_id="sortma2mh0it007mf10400"
-max_frames=10400
+if len(sys.argv)!=2:
+    print("provide prefix")
+    exit()
+prefix=sys.argv[1]
+
+# print(f'prefix:{prefix}')
+max_frames_dict={'train':10000,'development':2259,'test':10400}
+max_frames=max_frames_dict[prefix]
 
 global_thickness=2
 
-video = "/work/marioeduardo-a/ftc/FTC-2024-data/Test/test.mp4"
-# raw_result_file = "TrackEvalYulun/data/trackers/mot_challenge/FISHsortma2mh0it007-train/Trainsortma2mh0it007/data/raw.txt"
-raw_result_file = "TrackEvalYulun/data/trackers/mot_challenge/FISHsub-sortma2mh0it007mf10400-train/Trainsub-sortma2mh0it007mf10400/data/raw.txt"
-# raw_result_file = "FISH_HOTA054.txt"
+# video = "/work/marioeduardo-a/ftc/FTC-2024-data/Train/train.mp4"
+# video = "/work/marioeduardo-a/ftc/FTC-2024-data/Development/development.mp4"
+video_dict={'train':"/work/marioeduardo-a/ftc/FTC-2024-data/Train/train.mp4",
+            'development': "/work/marioeduardo-a/ftc/FTC-2024-data/Development/development.mp4",
+            'test':"/work/marioeduardo-a/ftc/FTC-2024-data/Test/test.mp4"}
+
+video = video_dict[prefix]
+
+raw_result_file_dict={'train':"sort_train_mf10000_raw_wbest-organizerss5000f5000fr5000ma2mi0it0.txt",
+                      'development':"sort_development_mf2259_raw_wbest-organizerss5000f5000fr5000ma2mi0it0.txt",
+                      'test':"sort_test_mf10400_raw_wbest-organizerss5000f5000fr5000ma2mi0it0.txt"}
+raw_result_file=raw_result_file_dict[prefix]
 
 cap = cv2.VideoCapture(video)
 
@@ -26,64 +41,79 @@ print(frame_width,frame_height)
 # max_frames=10
 # max_frames=int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
 # out = cv2.VideoWriter(os.path.join(tracker_folder, f'outpy{max_frames}.avi'), cv2.VideoWriter_fourcc('M','J','P','G'), 10, (frame_width,frame_height))
-out = cv2.VideoWriter(f'outpy_{max_frames}_yolo_{raw_result_file.split(".")[0]}.mp4', cv2.VideoWriter_fourcc(*'mp4v'), 10, (frame_width,frame_height))
+out = cv2.VideoWriter(f'{raw_result_file.split(".")[0]}.mp4', cv2.VideoWriter_fourcc(*'mp4v'), 10, (frame_width,frame_height))
 
-colors_tr = [(255, 255, 255),  (127,127,127), (0, 0, 0),#white,gray,black\
-             (255, 0, 0), (0, 255, 0), (0, 0, 255), #red,green,blue
-             (0, 255, 255), (255, 0, 255), (255, 255, 0), #cyan, magenta, yellow
-             (64, 64, 159), #brown
-             (255, 255, 255),  (127,127,127), (0, 0, 0),#white,gray,black\
-             (127, 0, 0), (0, 127, 0), (0, 0, 127), ##dark red,green,blue
-             (0, 127, 127), (127, 0, 127), (127, 127, 0), # dark cyan, magenta, yellow light
-             (64, 64  , 92), #dark brown
-             (255, 255, 255),  (127,127,127), (0, 0, 0),#white,gray,black\
-             (255, 127, 127), (127, 255, 127), (127, 127, 255), ##light red,green,blue
-             (127, 255, 255), (255, 127, 255), (255, 255, 127), # light cyan, magenta, yellow light
-             (92, 92  , 165), #dark brown
-             ] 
+colors_gt = [(255, 255, 255),  (95,95,95), (0, 0, 0),#white,gray,black\
+             (0, 0, 255), (0, 127, 0), (255, 0, 0), #red,green,blue
+             (127, 127, 0), (255, 0, 255), (0, 255, 255), #cyan, magenta, yellow
+             (64, 64, 159)]
+colors_tr = [color for color in colors_gt]
 
 
 with open(raw_result_file, 'r') as f:
     frames = 1
     ret, img = cap.read()
-    
     for i in tqdm(range(max_frames)):
-                
+        
+        cv2.putText(img, f"{i+1}  {prefix}", (50, 100 ), cv2.FONT_HERSHEY_SIMPLEX, 1,(0,0,0), 2)    
+
+        # put ids at the top right                    
+        x0, dx = 1900, 50
+        y0, dy = 100, 50
+        for ii in range(len(colors_gt)):
+            x = x0 + ii%10*dx
+            y = y0 + (ii//10)*dy
+            cv2.putText(img, f"{(ii+1):2}", (x, y ), cv2.FONT_HERSHEY_SIMPLEX, 1,colors_gt[ii], global_thickness)    
+        
+        maxid=0
         while True:
             fine_num = f.tell()
             line = f.readline()
-            # print(line)
             line = line.strip()
+            # print(f" fine_num:{fine_num} line:{line} len(line.split(" ")):{len(line.split(" "))}")
             if len(line.split(" ")) == 1:
                 break
             frame, bid, left, top, width, height, _, _, _, _ = line.split(" ")
             frame, bid, left, top, width, height = int(frame), int(bid), float(left), float(top), float(width), float(height)
-
+            # print(f" fine_num:{fine_num} frame:{frame} bid:{bid}")
+            if bid>=maxid:
+                maxid=bid
+            
             if frame > frames:
                 f.seek(fine_num)
                 frames = frame
                 break
-                
-
-            if frame > frames:
-                f.seek(fine_num)
-                break
-                #frames = frame
-            if bid<=10:
-                cv2.rectangle(img, (floor(left),floor(top)), (floor(left+width),floor(top+height)), colors_tr[(bid-1) %  len(colors_tr)], 2)
-            elif bid<=20:
-                cv2.rectangle(img, (floor(left)-3,floor(top)-3), (floor(left+width)+3,floor(top+height)+3), colors_tr[(bid-1) % len(colors_tr)], 1)
-                cv2.rectangle(img, (floor(left)+3,floor(top)+3), (floor(left+width)-3,floor(top+height)-3), colors_tr[(bid-1) %  len(colors_tr)], 1)
-            else: 
-                cv2.rectangle(img, (floor(left)-5,floor(top)-5), (floor(left+width)+5,floor(top+height)+5), colors_tr[(bid-1) % len(colors_tr)], 1)
-                cv2.rectangle(img, (floor(left),floor(top)), (floor(left+width),floor(top+height)), colors_tr[(bid-1) %  len(colors_tr)], 1)
-                cv2.rectangle(img, (floor(left)+5,floor(top)+5), (floor(left+width)-5,floor(top+height)-5), colors_tr[(bid-1) %  len(colors_tr)], 1)
             
+            x1,y1=floor(left),floor(top)
+            x2,y2=(floor(left+width),floor(top+height))
+              
+            if bid<=10:
+                cv2.rectangle(img, (x1,y1), (x2,y2), colors_tr[(bid-1) %  len(colors_tr)], 2)
+            elif bid<=20:
+                delta=3
+                cv2.rectangle(img, (x1-delta,y1-delta), (x2+delta,y2+delta), colors_tr[(bid-1) % len(colors_tr)], 1)
+                cv2.rectangle(img, (x1+delta,y1+delta), (x2-delta,y2-delta), colors_tr[(bid-1) %  len(colors_tr)], 1)
+            else: 
+                delta=5
+                cv2.rectangle(img, (x1-delta,y1-delta), (x2+delta,y2+delta), colors_tr[(bid-1) % len(colors_tr)], 1)
+                cv2.rectangle(img, (x1,y1), (x2,y2), colors_tr[(bid-1) %  len(colors_tr)], 1)
+                cv2.rectangle(img, (x1+delta,y1+delta), (x2-delta,y2-delta), colors_tr[(bid-1) %  len(colors_tr)], 1)
+            
+            
+            # 标注文本
             font = cv2.FONT_HERSHEY_SIMPLEX
             text = str(bid)
-            # cv2.putText(img, text, (floor(left + 20), floor(top + 20)), font, 1, colors[bid % len(colors)], 1)
-            cv2.putText(img, text, (floor(left), floor(top-5)), font, 1, colors_tr[(bid-1) % len(colors_tr)], global_thickness)
+            # cv2.putText(img, text, (floor(left + 20), floor(top + 20)), font, 1, colors[(bid-1) %  len(colors)], 1)
+            x1,y1=floor(left+width+5),floor(top+height/4)
+            
+            # cv2.putText(img, text, (floor(left + 20), floor(top + 20)), font, 1, colors[(bid-1) %  len(colors)], 1)
+            cv2.putText(img, text, (x1, y1), font, 1, colors_tr[(bid-1) %  len(colors_tr)], 2)
         
+        cv2.putText(img, f"maxid:{maxid}", (250, 150), font, 1, colors_tr[(maxid-1) %  len(colors_tr)], 2)
+
+        # font = cv2.FONT_HERSHEY_SIMPLEX
+        # text=f'Frame: {i:5}'
+        # cv2.putText(img, text, (100,2000), font, 2, (0, 0, 0), 4)
         out.write(img)
         ret, img = cap.read()
 

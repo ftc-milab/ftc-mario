@@ -1,0 +1,111 @@
+composite 
+
+#!/bin/bash
+
+magick composite -gravity center crop_00230.jpeg  rose:crop_00230.jpeg
+
+
+convert crop_00230.jpeg crop_00231.jpeg -gravity center -composite all.jpeg
+convert crop_*.jpeg -gravity center -composite a.jpeg
+
+convert crop_00230.jpeg crop_00231.jpeg -gravity center -background None -layers Flatten all.jpeg
+
+composite -gravity center crop_00230.jpeg crop_00231.jpeg output.jpg
+
+convert crop_00230.jpeg \( crop_00231.jpeg -alpha set -channel A -evaluate set 25% \) -composite output25.jpg
+convert crop_00230.jpeg \( crop_00231.jpeg -alpha set -channel A -evaluate set 50% \) -composite output50.jpg
+convert crop_00230.jpeg \( crop_00231.jpeg -alpha set -channel A -evaluate set 75% \) -composite output75.jpg
+
+
+for i in 230 232
+
+convert crop_00230.jpeg \( crop_00232.jpeg -alpha set -channel A -evaluate set 50% \) -composite d1.jpeg
+convert d1.jpeg \( crop_00234.jpeg -alpha set -channel A -evaluate set 50% \) -composite d2.jpeg
+convert d2.jpeg \( crop_00236.jpeg -alpha set -channel A -evaluate set 50% \) -composite d3.jpeg
+convert d3.jpeg \( crop_00238.jpeg -alpha set -channel A -evaluate set 50% \) -composite d4.jpeg
+convert d4.jpeg \( crop_00240.jpeg -alpha set -channel A -evaluate set 50% \) -composite d5.jpeg
+
+
+start=2
+finish=14
+trans=25
+suffix=output/e${trans}_
+
+convert 000${start}.jpeg \( 00231.jpeg -alpha set -channel A -evaluate set ${trans}% \) -composite ${suffix}$((start+1)).jpeg
+
+for ((i=start; i<finish; i++)); do
+   echo "$((i + 1))"
+   convert ${suffix}${i}.jpeg \( 00$((i+1)).jpeg -alpha set -channel A -evaluate set ${trans}% \) -composite ${suffix}$((i+1)).jpeg
+done
+
+
+
+trans=25
+suffix=output/e${trans}_rev_
+
+convert crop_00231.jpeg \( crop_00230.jpeg -alpha set -channel A -evaluate set ${trans}% \) -composite ${suffix}231.jpeg
+
+for ((i=231; i<240; i++)); do
+   echo "$((i + 1))"
+   convert crop_00$((i+1)).jpeg \( ${suffix}${i}.jpeg -alpha set -channel A -evaluate set ${trans}% \) -composite ${suffix}$((i+1)).jpeg
+done
+
+
+
+
+convert crop_00230.jpeg \( crop_00232.jpeg -alpha set -channel A -evaluate set 50% \) -composite e1.jpeg
+convert e1.jpeg \( crop_00234.jpeg -alpha set -channel A -evaluate set 50% \) -composite d2.jpeg
+convert e2.jpeg \( crop_00236.jpeg -alpha set -channel A -evaluate set 50% \) -composite d3.jpeg
+convert e3.jpeg \( crop_00238.jpeg -alpha set -channel A -evaluate set 50% \) -composite d4.jpeg
+convert e4.jpeg \( crop_00240.jpeg -alpha set -channel A -evaluate set 50% \) -composite d5.jpeg
+
+
+
+
+
+
+
+
+convert crop_00234.jpeg \( crop_00236.jpeg -alpha set -channel A -evaluate set 50% \) -composite 3.jpg
+convert crop_00236.jpeg \( crop_00238.jpeg -alpha set -channel A -evaluate set 50% \) -composite 4.jpg
+convert crop_00238.jpeg \( crop_00240.jpeg -alpha set -channel A -evaluate set 50% \) -composite 5.jpg
+
+
+convert crop_00232.jpeg \( crop_00236.jpeg -alpha set -channel A -evaluate set 50% \) -composite c1.jpg
+convert crop_00236.jpeg \( crop_00240.jpeg -alpha set -channel A -evaluate set 50% \) -composite c2.jpg
+convert crop_0023.jpeg \( crop_00236.jpeg -alpha set -channel A -evaluate set 50% \) -composite 3.jpg
+convert crop_00236.jpeg \( crop_00238.jpeg -alpha set -channel A -evaluate set 50% \) -composite 4.jpg
+convert crop_00238.jpeg \( crop_00240.jpeg -alpha set -channel A -evaluate set 50% \) -composite 5.jpg
+
+
+
+
+convert crop_00234.jpeg \
+    \( crop_00232.jpeg -alpha set -channel A -evaluate set 50% \) \
+	\( crop_00230.jpeg -alpha set -channel A -evaluate set 50% \) \
+	-composite output.jpg
+
+convert crop_00230.jpeg \( crop_00231.jpeg -alpha set -channel A -evaluate set 50% \) \( crop_00232.jpeg -alpha set -channel A -evaluate set 30% \) -composite output50_30.jpg
+
+
+convert crop_00230.jpeg \( crop_00231.jpeg -alpha set -channel A -evaluate set 50% \) \( crop_00232.jpeg -alpha set -channel A -evaluate set 30% \) -composite output50_30.jpg
+
+
+convert crop_00230.jpeg \( crop_00231.jpeg -alpha set -channel A -evaluate set 0% \) \( crop_00232.jpeg -alpha set -channel A -evaluate set 80% \) \( crop_00233.jpeg -alpha set -channel A -evaluate set 70% \) \( crop_00234.jpeg -alpha set -channel A -evaluate set 60% \) \( crop_00235.jpeg -alpha set -channel A -evaluate set 50% \) \( crop_00236.jpeg -alpha set -channel A -evaluate set 40% \) -composite output_230-236.jpg
+
+
+
+
+
+convert \
+  crop_00230.jpeg \
+  \( crop_00231.jpeg -alpha set -channel A -evaluate set 50% \) \
+  \( crop_00232.jpeg -alpha set -channel A -evaluate set 30% \) \
+  \( crop_00233.jpeg -alpha set -channel A -evaluate set 20% \) \
+  \( crop_00234.jpeg -alpha set -channel A -evaluate set 10% \) \
+  \( crop_00235.jpeg -alpha set -channel A -evaluate set 5% \) \
+  \( crop_00236.jpeg -alpha set -channel A -evaluate set 15% \) \
+  \( crop_00237.jpeg -alpha set -channel A -evaluate set 25% \) \
+  \( crop_00238.jpeg -alpha set -channel A -evaluate set 40% \) \
+  \( crop_00239.jpeg -alpha set -channel A -evaluate set 60% \) \
+  -composite output.jpg

@@ -1,0 +1,132 @@
+# Fish Tracking NAIST HPC Azure
+
+# Login to Azure
+
+ssh [marioeduardo-a@cc21dev0.naist.jp](mailto:marioeduardo-a@cc21dev0.naist.jp)
+(TIP: use `ssh-copy-id marioeduardo-a@cc21dev0.naist.jp` to exchange keys so
+that you do not have to write your password everytime. If you have not generated
+SSH keys, you can do by executing `ssh-keygen` and entering [Enter] for all the
+options presented (default options), and afterwards you can execute `ssh-copy-id`)
+bash
+srun -p azuregpu1_intr --gres=gpu:1 --chdir=/work/marioeduardo-a -n 10 --pty bash -l
+srun -p azuregpu1_intr --chdir=/work/marioeduardo-a -n 10 --pty bash -l
+srun --time=4:00:00 -p azuregpu1_intr --gres=gpu:1 --chdir=/work/marioeduardo-a -n 10 --pty bash -l
+srun --time=4:00:00 -p azuregpu1_intr --chdir=/work/marioeduardo-a -n 10 --pty bash -l
+
+# CUDA Setup
+
+wget https://developer.download.nvidia.com/compute/cuda/11.8.0/local_installers/cuda_11.8.0_520.61.05_linux.run
+sh cuda_11.8.0_520.61.05_linux.run --silent --toolkit --toolkitpath=/work/marioeduardo-a/cuda-11.8
+
+# CUDNN Setup (you must download the tgz file from Nvidia and upload using SCP/SFTP (for azure only SFTP is allowed)
+
+scp /mnt/c/Users/Mario/Downloads/cudnn-11.2-linux-x64-v8.1.1.33.tgz [marioeduardo-a@cc21dev0.naist.jp](mailto:marioeduardo-a@cc21dev0.naist.jp):/work/marioeduardo-a/
+ssh [marioeduardo-a@cc21dev0.naist.jp](mailto:marioeduardo-a@cc21dev0.naist.jp)
+bash
+sftp azure-cc1 <<< "put cudnn-linux-x86_64-8.9.6.50_cuda11-archive.tar.xz"
+(TIP: use `ssh-copy-id azure-cc1` to exchange keys so that you do not have to write
+your password everytime. If you have not generated SSH keys, you can do by
+executing `ssh-keygen` and entering [Enter] for all the options presented
+(default options), and afterwards you can execute `ssh-copy-id`)
+srun -p azuregpu1_intr --gres=gpu:1 --chdir=/work/marioeduardo-a -n 10 --pty bash -l
+
+tar xvf cudnn-linux-x86_64-8.9.6.50_cuda11-archive.tar.xz --directory=/work/marioeduardo-a/cuda-11.8 --strip-components=1
+(modify .bashrc in your home directory to include the following lines; not sure if all are necessary but check by yourself)
+########## .bashrc#########
+
+# NVIDIA (required by mujoco_py)
+
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/lib/nvidia
+
+# CUDA BASIC
+
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/lib/x86_64-linux-gnu
+
+# CUDA 11.8
+
+export PATH=/work/marioeduardo-a/cuda-11.8/bin:$PATH
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/work/marioeduardo-a/cuda-11.8/lib64
+export TMPDIR=/work/marioeduardo-a/tmp
+########## .bashrc#########
+
+# Miniconda Setup
+
+wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
+bash ./Miniconda3-latest-Linux-x86_64.sh
+Accept license
+[Enter] for default location
+"yes" for initializatoin
+exit
+srun -p azuregpu1_intr --gres=gpu:1 --chdir=/work/marioeduardo-a -n 10 --pty bash -l
+
+(TIP: if you do not need the GPU yet, you can login without the --gres=gpu:1 option. That
+way if there are many people using GPU it will still let you login (probably). This is
+useful when you only need to login to install things or check files. However, for things
+regarding CUDA/cudnn (e.g. ultralytics) it is necessary to login with GPU option.)
+conda create -n ftc310 python=3.10
+conda activate ftc310
+pip install tqdm
+pip install ultralytics
+pip install --force-reinstall numpy==1.23.5
+pip install --force-reinstall torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
+
+# Clone ftc-mario repo
+
+ssh [marioeduardo-a@cc21dev0.naist.jp](mailto:marioeduardo-a@cc21dev0.naist.jp)
+srun --time=4:00:00 -p azuregpu1_intr --gres=gpu:1 --chdir=/work/marioeduardo-a -n 10 --pty bash -l
+
+cd github/
+git clone [git@github.com](mailto:git@github.com):ftc-milab/ftc-mario.git
+
+# Transfer Files from cc1dev to Azure
+
+ssh [marioeduardo-a@cc21dev0.naist.jp](mailto:marioeduardo-a@cc21dev0.naist.jp)
+sftp azure-cc1 <<< "put -r FTC-2024-data"
+
+# Generate dataset
+
+ssh [marioeduardo-a@cc21dev0.naist.jp](mailto:marioeduardo-a@cc21dev0.naist.jp)
+sbatch --time=4:00:00 -p azuregpu1_long --gres=gpu:1 --chdir=/work/marioeduardo-a -n 10 github/ftc-mario/ftc_dataset.sh
+
+# Prepare 8lb256 and 8xb128
+
+cp ftc_train_2.sh ftc_train_8lb256.sh
+cp ftc_train_2.py ftc_train_8lb256.py
+cp param-train-2.csv param-train-8lb256.csv
+vim ftc_train_8lb256.sh
+vim ftc_train_8lb256.py
+vim param-train-8lb256.csv
+cp ftc_train_8lb256.sh ftc_train_8xb128.sh
+cp ftc_train_8lb256.py ftc_train_8xb128.py
+cp param-train-8lb256.csv param-train-8xb128.csv
+vim ftc_train_8xb128.sh
+vim ftc_train_8xb128.py
+vim param-train-8xb128.csv
+
+# Run 8lb256
+
+sbatch --time=30:00:00 -p azuregpu1_long --gres=gpu:1 --chdir=/work/marioeduardo-a -n 10 github/ftc-mario/ftc_train_8lb256.sh
+
+# Run 8xb128
+
+sbatch --time=30:00:00 -p azuregpu1_long --gres=gpu:1 --chdir=/work/marioeduardo-a -n 10 github/ftc-mario/ftc_train_8xb128.sh
+
+mv ftc_train_8lb256.sh ftc_train_8l.sh
+mv ftc_train_8lb256.py ftc_train_8l.py
+mv param-train-8lb256.csv param-train-8l.csv
+mv ftc_train_8xb128.sh ftc_train_8x.sh
+mv ftc_train_8xb128.py ftc_train_8x.py
+mv param-train-8xb128.csv param-train-8x.csv
+vim ftc_train_8l.sh
+vim ftc_train_8l.py
+vim param-train-8l.csv
+
+# Run 8lb192
+
+sbatch --time=30:00:00 -p azuregpu1_long --gres=gpu:1 --chdir=/work/marioeduardo-a -n 10 github/ftc-mario/ftc_train_8l.sh
+
+# Hyper 8lb128
+
+
+# Train 8m
+ sbatch --time=30:00:00 -p gpu_long -w cc21gpu04 --gres=gpu:2 -n 10 github/ftc-mario/ftc_train_8m.sh

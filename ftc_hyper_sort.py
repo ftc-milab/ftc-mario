@@ -2,7 +2,11 @@
 # Input: hyperparameters are read from a csv file
 # Output: BBs file; HOTA results; HOTA results summary in CSV file
 
+# from sort import Sort
 from sort import Sort
+from sort_rematch import Sort as SortRematch
+from sort_skip import Sort as SortSkip
+from sort_rematch_skip import Sort as SortRematchSkip
 from ultralytics.engine.results import Boxes
 
 import os
@@ -111,9 +115,18 @@ def track(exp_id=None,\
                         iou_threshold=0.3):
     model=YOLO(weights_fn)
     
+    if tracker_type=='sort':
+        mot_tracker = Sort(max_age=max_age,min_hits=min_hits,iou_threshold=iou_threshold) 
+    elif tracker_type=='sort_rematch':
+        mot_tracker = SortRematch(max_age=max_age,min_hits=min_hits,iou_threshold=iou_threshold) 
+    elif tracker_type=='sort_skip':
+        mot_tracker = SortSkip(max_age=max_age,min_hits=min_hits,iou_threshold=iou_threshold) 
+    elif tracker_type=='sort_rematch_skip':
+        mot_tracker = SortRematchSkip(max_age=max_age,min_hits=min_hits,iou_threshold=iou_threshold) 
+    
 
     #create instance of SORT
-    mot_tracker = Sort(max_age=max_age,min_hits=min_hits,iou_threshold=iou_threshold) 
+    
     #tracking the model and write the result to txt
     # video = "/content/drive/MyDrive/FTC-2024-data/Train/train.mp4"
     video = "/work/marioeduardo-a/ftc/FTC-2024-data/Train/train.mp4"

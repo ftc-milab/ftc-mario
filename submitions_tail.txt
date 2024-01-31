@@ -1,0 +1,35 @@
+
+for EXP_ID in sub-ma25mh0it007 sub-ma11mh0it007_8xb64e900 sub-ma17mh0it007_8xb64e900 sub-ma25mh0it007_8xb64e900 sub-ma11mh0it007_8lb144e900 sub-ma17mh0it007_8lb144e900 sub-ma25mh0it007_8lb144e900 ; do 
+  FILE=/work/marioeduardo-a/github/ftc-mario/TrackEvalYulun/data/trackers/mot_challenge/FISH${EXP_ID}-train/Train${EXP_ID}/data/answer.txt
+  echo ${EXP_ID}; tail -n 10 $FILE |cut -c 1-9
+done
+
+
+
+for EXP_ID in sub-ma2mh0it007_8xb64e900 sub-ma2mh0it007_8lb144e900  ; do 
+  FILE=/work/marioeduardo-a/github/ftc-mario/TrackEvalYulun/data/trackers/mot_challenge/FISH${EXP_ID}-train/Train${EXP_ID}/data/answer.txt
+  echo ${EXP_ID}; tail -n 10 $FILE |cut -c 1-9
+done
+
+
+
+
+for EXP_ID in sub-ma2mh0it0 sub-ma11mh0it0 sub-ma17mh0it0 sub-ma25mh0it0 sub-8xb64e900-ma2mh0it0 sub-8xb64e900-ma11mh0it0 sub-8xb64e900-ma17mh0it0 sub-8xb64e900-ma25mh0it0 sub-8lb144e900-ma2mh0it0 sub-8lb144e900-ma11mh0it0 sub-8lb144e900-ma17mh0it0 sub-8lb144e900-ma25mh0it0 ; do
+  FILE=/work/marioeduardo-a/github/ftc-mario/TrackEvalYulun/data/trackers/mot_challenge/FISH${EXP_ID}-train/Train${EXP_ID}/data/answer.txt
+  echo ${EXP_ID}; tail -n 10 $FILE |cut -c 1-9
+done
+
+
+
+for EXP_ID in sub-8lb144e900-ma11mh1it0 sub-8lb144e900-ma17mh1it0 sub-8lb144e900-ma25mh1it0 sub-8lb144e900-ma11mh2it0 sub-8lb144e900-ma17mh2it0 sub-8lb144e900-ma25mh2it0 sub-8lb144e900-ma11mh3it0 sub-8lb144e900-ma17mh3it0 sub-8lb144e900-ma25mh3it0 ; do
+  FILE=/work/marioeduardo-a/github/ftc-mario/TrackEvalYulun/data/trackers/mot_challenge/FISH${EXP_ID}-train/Train${EXP_ID}/data/answer.txt
+  echo ${EXP_ID}; tail -n 10 $FILE |cut -c 1-9
+done
+
+
+#LAST ONE
+
+for EXP_ID in sub-t80v20t0-8lb144e200 sub-t80v20t0-8lb144e200 sub-t80v20t0-8lb144e200 sub-t80v20t0-8lb144e200 sub-t80v20t0-8lb144e200 sub-t80v20t0-8lb144e200 sub-t80v20t0-8lb144e200 sub-t80v20t0-8lb144e200 sub-t80v20t0-8lb144e200 ; do
+  FILE=/work/marioeduardo-a/github/ftc-mario/TrackEvalYulun/data/trackers/mot_challenge/FISH${EXP_ID}-train/Train${EXP_ID}/data/answer.txt
+  echo ${EXP_ID}; tail -n 10 $FILE |cut -c 1-9
+done

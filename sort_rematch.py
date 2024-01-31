@@ -235,10 +235,13 @@ def associate_detections_to_trackers(detections,trackers,iou_threshold = 0.3):
     if(t not in matched_indices[:,1]):
       unmatched_trackers.append(t)
 
+
+  ### THIS WILL NEVER ENTER iou_threshold is 0
   #filter out matched with low IOU
   matches = []
   for m in matched_indices:
     if(iou_matrix[m[0], m[1]]<iou_threshold):
+      print("this should never enter")
       unmatched_detections.append(m[0])
       unmatched_trackers.append(m[1])
     else:
@@ -251,6 +254,7 @@ def associate_detections_to_trackers(detections,trackers,iou_threshold = 0.3):
     matches = np.concatenate(matches,axis=0)
     # print("matches after")
     # print(matches)
+  ### THIS WILL NEVER ENTER iou_threshold is 0
 
   return matches, np.array(unmatched_detections), np.array(unmatched_trackers)
 
@@ -298,35 +302,51 @@ class Sort(object):
       pos = self.trackers[t].predict()[0]
       trk[:] = [pos[0], pos[1], pos[2], pos[3], 0]
       if np.any(np.isnan(pos)):
+        print(' tracklet with nan pos')
         to_del.append(t)
     trks = np.ma.compress_rows(np.ma.masked_invalid(trks))
     for t in reversed(to_del):
       self.trackers.pop(t)
-    print('dets')
-    print(dets)
-    print('trks')
-    print(trks)
-    # print('unmatched_trks')
-    # print(unmatched_trks)
+
 
     matched, unmatched_dets, unmatched_trks = associate_detections_to_trackers(dets,trks, self.iou_threshold)
 
-    # print('matched')
-    # print(matched)
-    # print('unmatched_dets')
-    # print(unmatched_dets)
-    # print('unmatched_trks')
-    # print(unmatched_trks)
-    print(trks[unmatched_trks])
+    # assign lost track to a copy of the dets 
+    if len(unmatched_trks)!=0:
+      # print(' assigna unmatched track')
+      # print('trks')
+      # print(trks)
+      # print('dets')
+      # print(dets)
+      # print('unmatched_trks')
+      # print(unmatched_trks)
+      # print('matched')
+      # print(matched)
+      trks_temp=[trks[unmatched_trks[0]]]
+      # print('trks_temp')
+      # print(trks_temp)
 
-    if(len(unmatched_trks)==0):
-      # iou_matrix = iou_batch(dets, )
-      pass
+      t_matched, t_unmatched_dets, t_unmatched_trks =associate_detections_to_trackers(dets,trks_temp, self.iou_threshold)
+
+      # print('t_matched')
+      # print(t_matched)
+      # print('t_unmatched_dets')
+      # print(t_unmatched_dets)
+      # print('t_unmatched_trks')
+      # print(t_unmatched_trks)
+      
+      new_matched=np.array([[t_matched[0][0],unmatched_trks[0]]])
+      
+      matched=np.concatenate((matched,new_matched),axis=0)
+      # print('matched')
+      # print(matched)
+      # exit()
 
 
     # update matched trackers with assigned detections
     for m in matched:
       self.trackers[m[1]].update(dets[m[0], :])
+      
 
     # create and initialise new trackers for unmatched detections
     for i in unmatched_dets:
@@ -335,11 +355,15 @@ class Sort(object):
     i = len(self.trackers)
     for trk in reversed(self.trackers):
         d = trk.get_state()[0]
-        if (trk.time_since_update < 1) and (trk.hit_streak >= self.min_hits or self.frame_count <= self.min_hits):
+        if (trk.time_since_update < 1) \
+            and (trk.hit_streak >= self.min_hits \
+            or self.frame_count <= self.min_hits):
           ret.append(np.concatenate((d,[trk.id+1])).reshape(1,-1)) # +1 as MOT benchmark requires positive
+          
         i -= 1
         # remove dead tracklet
         if(trk.time_since_update > self.max_age):
+          print(' remove tracklet')
           self.trackers.pop(i)
     if(len(ret)>0):
       return np.concatenate(ret)

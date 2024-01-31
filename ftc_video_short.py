@@ -4,19 +4,22 @@ from math import floor
 import os
 
 from tqdm import tqdm
-
-foi=[100]
+prefix="rematch_problem"
+foi=[356,683,812,1071]
 
 # foi=[50]
-foi_idx=0
-foi_range=1000
+foi_idx=0   #current index for frame of interest
+foi_range=100
 
-max_frames=100
+max_frames=1500
 
+# video = "/work/marioeduardo-a/ftc/FTC-2024-data/Train/train.mp4"
+# video = "/work/marioeduardo-a/ftc/FTC-2024-data/Development/development.mp4"
 video = "/work/marioeduardo-a/ftc/FTC-2024-data/Test/test.mp4"
 
 # raw_result_file = "sort_mario_test_skip-ud_raw_s1110f9826fr10ma25mi0it0.txt"
-raw_result_file = "sort_mario_test_skip-ud_raw_wbest-organizers.pts1110f9826fr10ma2mi0it0.txt"
+# raw_result_file = "sort_mario_test_skip-ud_raw_wbest-organizers.pts1110f9826fr10ma2mi0it0.txt"
+raw_result_file = "sort_mario_test_mf10400_raw_wbest-organizerss5000f5000fr5000ma2mi0it0.txt"
 exp_id=raw_result_file.split('.')[0]
 
 cap = cv2.VideoCapture(video)
@@ -28,7 +31,7 @@ print(frame_width,frame_height, cap.get(cv2.CAP_PROP_FPS))
 if (cap.isOpened() == False):
   print("Unable to read camera feed")
 ss="_".join([str(i) for i in foi])
-out = cv2.VideoWriter(f'outpy_{exp_id}_{ss}_yolo.mp4', cv2.VideoWriter_fourcc(*'mp4v'), 10, (frame_width,frame_height))
+out = cv2.VideoWriter(f'outpy_{prefix}_{exp_id}_{ss}_yolo.mp4', cv2.VideoWriter_fourcc(*'mp4v'), 10, (frame_width,frame_height))
 
 colors_gt = [(255, 255, 255),  (95,95,95), (0, 0, 0),#white,gray,black\
              (0, 0, 255), (0, 127, 0), (255, 0, 0), #red,green,blue

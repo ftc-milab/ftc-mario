@@ -1,10 +1,5 @@
 exp_id,max_frames,weights_fn,tracker_type,max_age,min_hits,iou_threshold
-t80v20t0-8lb144e200-ma11mh1it0,10000,t80v20t0-yolov8le200b144gpu1.pt,sort,11,1,0
-t80v20t0-8lb144e200-ma17mh1it0,10000,t80v20t0-yolov8le200b144gpu1.pt,sort,17,1,0
-t80v20t0-8lb144e200-ma25mh1it0,10000,t80v20t0-yolov8le200b144gpu1.pt,sort,25,1,0
-8mb16e1000best-ma11mh1it0,10000,yolov8m_e1000s100_dp.pt,sort,11,1,0
-8mb16e1000best-ma17mh1it0,10000,yolov8m_e1000s100_dp.pt,sort,17,1,0
-8mb16e1000best-ma25mh1it0,10000,yolov8m_e1000s100_dp.pt,sort,25,1,0
-8lb144e900-ma11mh1it0,10400,yolov8le1000b144gpu1_epoch900.pt,sort,11,1,0
-8lb144e900-ma17mh1it0,10400,yolov8le1000b144gpu1_epoch900.pt,sort,17,1,0
-8lb144e900-ma25mh1it0,10400,yolov8le1000b144gpu1_epoch900.pt,sort,25,1,0
+sort_ma2mh0it0,10000,best-organizers.pt,sort,2,0,0
+sort_ma2mh0it0_skip,10000,best-organizers.pt,sort_skip,2,0,0
+sort_ma2mh0it0_rematch_skip,10000,best-organizers.pt,sort_rematch_skip,2,0,0
+sort_ma2mh0it0_rematch,10000,best-organizers.pt,sort_rematch,2,0,0
